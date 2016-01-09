@@ -1,0 +1,18 @@
+{
+  "name": "molovo/pi-framework",
+  "autoload": {
+    "psr-4": {
+      "Pi\\Framework\\": "src/Pi/Framework/"
+    },
+    "files": [
+        "src/Pi/Framework/helpers.php"
+    ]
+  },
+  "require": {
+    "PHP": ">=5.5",
+    "molovo/traffic": "^0.1",
+    "molovo/str": "^0.1",
+    "molovo/pi-cli": "^0.1",
+    "filp/whoops": "dev-master"
+  }
+}
