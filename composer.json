@@ -14,6 +14,7 @@
     "molovo/str": "^0.1",
     "molovo/pi-cli": "^0.1",
     "molovo/interrogate": "^0.1",
+    "molovo/object": "^0.1",
     "filp/whoops": "^1.1"
   }
 }
