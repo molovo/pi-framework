@@ -78,7 +78,8 @@ class Application
         // Load the app's config
         $this->loadConfig();
 
-        Database::bootstrap($this->config->db);
+        // Bootstrap the database
+        Database::bootstrap($this->config->db->toArray());
 
         // Register global view variables
         View::addGlobal('appName', $this->config->app->name);
