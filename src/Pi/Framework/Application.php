@@ -3,6 +3,7 @@
 namespace Pi\Framework;
 
 use Closure;
+use Molovo\Interrogate\Database;
 use Molovo\Traffic\Route;
 use Molovo\Traffic\Router;
 use Pi\Framework\Config;
@@ -76,6 +77,8 @@ class Application
 
         // Load the app's config
         $this->loadConfig();
+
+        Database::bootstrap($this->config->db);
 
         // Register global view variables
         View::addGlobal('appName', $this->config->app->name);
