@@ -50,23 +50,13 @@ class Config
     }
 
     /**
-     * Get a config value.
+     * Return the config as an array.
      *
-     * @param string $key The key of the value to get
-     *
-     * @return mixed The value
+     * @return array
      */
-    public function get($key)
+    public function toArray()
     {
-        if (isset($this->values->{$key})) {
-            return $this->values->{$key};
-        }
-
-        if ($value = $this->valueForPath($key)) {
-            return $value;
-        }
-
-        return;
+        return (array) $this->values;
     }
 
     /**
@@ -102,6 +92,6 @@ class Config
      */
     public static function get($key)
     {
-        return Application::instance()->config->get($key);
+        return Application::instance()->config->valueForPath($key);
     }
 }
