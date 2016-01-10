@@ -2,6 +2,8 @@
 
 namespace Pi\Framework;
 
+use Pi\Framework\Application;
+
 class Config
 {
     /**
@@ -48,6 +50,26 @@ class Config
     }
 
     /**
+     * Get a config value.
+     *
+     * @param string $key The key of the value to get
+     *
+     * @return mixed The value
+     */
+    public function get($key)
+    {
+        if (isset($this->values->{$key})) {
+            return $this->values->{$key};
+        }
+
+        if ($value = $this->valueForPath($key)) {
+            return $value;
+        }
+
+        return;
+    }
+
+    /**
      * Get a value for a nested path.
      *
      * @param string $path The path to fetch
@@ -80,6 +102,6 @@ class Config
      */
     public static function get($key)
     {
-        return \Application::instance()->config->{$key};
+        return Application::instance()->config->get($key);
     }
 }
