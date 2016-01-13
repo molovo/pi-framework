@@ -32,6 +32,8 @@ class Response
         }
 
         $this->code = $code;
+
+        return $this;
     }
 
     /**
@@ -41,6 +43,8 @@ class Response
      */
     public function render($output)
     {
+        http_response_code($this->code);
+
         echo $output;
 
         while (ob_get_level() > 0) {
