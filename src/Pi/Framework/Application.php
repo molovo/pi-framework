@@ -36,6 +36,13 @@ class Application
     public $response = null;
 
     /**
+     * The application config.
+     *
+     * @var Config|null
+     */
+    public $config = null;
+
+    /**
      * Retrieve the current application instance.
      *
      * @return self
@@ -65,18 +72,18 @@ class Application
         // Store the instance statically
         static::$instance = $this;
 
-        // Register the error handler
-        $this->registerErrorHandler();
+        // Load the app's config
+        $this->loadConfig();
 
         // Create our request and response objects
         $this->request  = new Request;
         $this->response = new Response;
 
+        // Register the error handler
+        $this->registerErrorHandler();
+
         // Include the app routes
         require APP_ROOT.'routes.php';
-
-        // Load the app's config
-        $this->loadConfig();
 
         // Bootstrap the database
         Database::bootstrap($this->config->db->toArray());
@@ -86,6 +93,10 @@ class Application
 
         // Execute routes
         Router::execute();
+
+        if (Router::current() === null) {
+            return $this->error(404);
+        }
     }
 
     /**
@@ -94,10 +105,11 @@ class Application
      * @param string $output The output to render
      * @param int    $code   The HTTP response code
      */
-    public function response($output, $code = 200)
+    public function respond($output, $code = 200)
     {
         $this->response->setResponseCode($code);
-        $this->response->render($output);
+
+        return $this->response->render($output);
     }
 
     /**
@@ -125,11 +137,23 @@ class Application
      */
     private function registerErrorHandler()
     {
-        $run     = new Whoops\Run;
-        $handler = new PrettyPageHandler;
+        if ($this->config->app->dev_mode === true) {
+            $run     = new Whoops\Run;
+            $handler = new PrettyPageHandler;
 
-        $run->pushHandler($handler);
-        $run->register();
+            $run->pushHandler($handler);
+
+            return $run->register();
+        }
+
+        ini_set('display_errors', 'Off');
+
+        $app = $this;
+        register_shutdown_function(function () use ($app) {
+            if ($error = error_get_last()) {
+                $app->error(500);
+            }
+        });
     }
 
     /**
@@ -151,7 +175,21 @@ class Application
                 $app->response,
             ];
             $args = array_merge($data, func_get_args());
-            $app->response->render(call_user_func_array($callback, $args));
+            $app->respond(call_user_func_array($callback, $args));
         });
+    }
+
+    /**
+     * Render an error page.
+     *
+     * @param int $code The HTTP response code
+     *
+     * @return string The rendered response
+     */
+    public function error($code = 500)
+    {
+        $view = view('errors/'.$code);
+
+        return $this->respond($view, $code);
     }
 }
