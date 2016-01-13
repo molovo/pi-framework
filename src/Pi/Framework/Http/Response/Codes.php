@@ -9,7 +9,7 @@ class Codes
      *
      * @var string[]
      */
-    private $allowed = [
+    private static $allowed = [
         100 => 'Continue',
         101 => 'Switching Protocols',
         102 => 'Processing',
@@ -99,12 +99,12 @@ class Codes
      */
     public static function allowed($code = null)
     {
-        if ($code !== null && isset($this->allowed[$code])) {
+        if ($code !== null && isset(static::$allowed[$code])) {
             return true;
         }
 
         if ($code === null) {
-            return $this->allowed;
+            return static::$allowed;
         }
 
         return;
