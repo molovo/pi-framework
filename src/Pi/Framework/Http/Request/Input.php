@@ -47,6 +47,6 @@ class Input extends Object
      */
     public static function all()
     {
-        return Application::instance()->input->toArray();
+        return Application::instance()->request->input->toArray();
     }
 }
