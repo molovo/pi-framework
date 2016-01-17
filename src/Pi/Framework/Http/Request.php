@@ -35,7 +35,7 @@ class Request
     {
         $this->router = new Router;
         $this->method = $this->router->requestMethod();
-        $this->input  = new Input;
+        $this->input  = new Input(array_merge($_GET, $_POST));
     }
 
     /**

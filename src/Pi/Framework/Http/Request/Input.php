@@ -8,15 +8,6 @@ use Pi\Framework\Application;
 class Input extends Object
 {
     /**
-     * Grab all get and post variables, and create a new object with them.
-     */
-    public function __construct()
-    {
-        $values = array_merge($_GET, $_POST);
-        parent::__construct($values);
-    }
-
-    /**
      * Get a value from the input array. If multiple arguments or an array are
      * passed, then an array of values are returned.
      *
@@ -45,8 +36,11 @@ class Input extends Object
      *
      * @return array
      */
-    public static function all()
+    public static function all($escaped = true)
     {
+        if (!$escaped) {
+        }
+
         return Application::instance()->request->input->toArray();
     }
 }
