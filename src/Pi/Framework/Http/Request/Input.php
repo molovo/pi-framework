@@ -36,11 +36,8 @@ class Input extends Object
      *
      * @return array
      */
-    public static function all($escaped = true)
+    public static function all()
     {
-        if (!$escaped) {
-        }
-
         return Application::instance()->request->input->toArray();
     }
 }
