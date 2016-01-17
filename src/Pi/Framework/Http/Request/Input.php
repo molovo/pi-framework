@@ -18,14 +18,14 @@ class Input extends Object
     public static function get($key)
     {
         if (is_string($key) && func_num_args() === 1) {
-            return Application::instance()->input->valueForKey($key);
+            return Application::instance()->request->input->valueForKey($key);
         }
 
         $keys = is_array($key) ? $key : func_get_args();
 
         $values = [];
         foreach ($keys as $key) {
-            $values[$key] = Application::instance()->input->valueForKey($key);
+            $values[$key] = Application::instance()->request->input->valueForKey($key);
         }
 
         return $values;
