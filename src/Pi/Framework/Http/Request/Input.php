@@ -2,46 +2,50 @@
 
 namespace Pi\Framework\Http\Request;
 
-class Input
+use Molovo\Object\Object;
+
+class Input extends Object
 {
-    private $data = [];
-
-    private $rawData = [];
-
+    /**
+     * Grab all get and post variables, and create a new object with them.
+     */
     public function __construct()
     {
-        $data = array_merge($_GET, $_POST);
-
-        foreach ($data as $key => $value) {
-            $this->rawData[$key] = $value;
-            $this->data[$key]    = filter_var($value, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        }
+        $values = array_merge($_GET, $_POST);
+        parent::__construct($values);
     }
 
-    public function __get($key)
+    /**
+     * Get a value from the input array. If multiple arguments or an array are
+     * passed, then an array of values are returned.
+     *
+     * @param string|array $key The key (or keys) to fetch
+     *
+     * @return mixed
+     */
+    public static function get($key)
     {
-        return $this->get($key, true);
-    }
-
-    public function get($key, $escaped = true)
-    {
-        $data = $escaped ? $this->data : $this->rawData;
-
-        if (is_array($key)) {
-            $rtn = [];
-
-            foreach ($key as $keyName) {
-                $rtn[$keyName] = $data[$key];
-            }
-
-            return $rtn;
+        if (is_string($key) && func_num_args() === 1) {
+            return Application::instance()->input->valueForKey($key);
         }
 
-        return $data[$key];
+        $keys = is_array($key) ? $key : func_get_args();
+
+        $values = [];
+        foreach ($keys as $key) {
+            $values[$key] = Application::instance()->input->valueForKey($key);
+        }
+
+        return $values;
     }
 
-    public function all($escaped = true)
+    /**
+     * Get all the input arguments from the array.
+     *
+     * @return array
+     */
+    public static function all()
     {
-        return $escaped ? $this->data : $this->rawData;
+        return Application::instance()->input->toArray();
     }
 }

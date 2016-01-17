@@ -12,7 +12,7 @@ class Request
      *
      * @var array
      */
-    private $input = [];
+    public $input = [];
 
     /**
      * The current request method.
