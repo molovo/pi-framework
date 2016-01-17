@@ -2,6 +2,7 @@
   "name": "molovo/pi-framework",
   "autoload": {
     "psr-4": {
+      "Pi\\Cli\\": "src/Pi/Cli/"
       "Pi\\Framework\\": "src/Pi/Framework/"
     },
     "files": [
@@ -12,7 +13,6 @@
     "PHP": ">=5.5",
     "molovo/traffic": "^0.1",
     "molovo/str": "^0.1",
-    "molovo/pi-cli": "dev-master",
     "molovo/interrogate": "^0.1",
     "molovo/object": "^0.2",
     "filp/whoops": "^1.1"
