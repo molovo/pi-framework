@@ -16,5 +16,6 @@
     "molovo/interrogate": "^0.1",
     "molovo/object": "^0.2",
     "filp/whoops": "^1.1"
-  }
+  },
+  "minimum-stability": "dev"
 }
