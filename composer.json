@@ -2,7 +2,7 @@
   "name": "molovo/pi-framework",
   "autoload": {
     "psr-4": {
-      "Pi\\Cli\\": "src/Pi/Cli/"
+      "Pi\\Cli\\": "src/Pi/Cli/",
       "Pi\\Framework\\": "src/Pi/Framework/"
     },
     "files": [
