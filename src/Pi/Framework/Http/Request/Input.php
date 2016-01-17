@@ -15,17 +15,20 @@ class Input extends Object
      *
      * @return mixed
      */
-    public static function get($key)
+    public static function get($key, $escaped = true)
     {
+        $request = Application::instance()->request;
+        $input   = $escaped ? $request->input : $request->rawInput;
+
         if (is_string($key) && func_num_args() === 1) {
-            return Application::instance()->request->input->valueForKey($key);
+            return $input->valueForKey($key);
         }
 
         $keys = is_array($key) ? $key : func_get_args();
 
         $values = [];
         foreach ($keys as $key) {
-            $values[$key] = Application::instance()->request->input->valueForKey($key);
+            $values[$key] = $input->valueForKey($key);
         }
 
         return $values;
@@ -36,8 +39,11 @@ class Input extends Object
      *
      * @return array
      */
-    public static function all()
+    public static function all($escaped = true)
     {
-        return Application::instance()->request->input->toArray();
+        $request = Application::instance()->request;
+        $input   = $escaped ? $request->input : $request->rawInput;
+
+        return $input->toArray();
     }
 }

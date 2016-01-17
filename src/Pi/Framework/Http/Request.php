@@ -35,22 +35,32 @@ class Request
     {
         $this->router = new Router;
         $this->method = $this->router->requestMethod();
-        $this->input  = new Input(array_merge($_GET, $_POST));
+
+        $input           = array_merge($_GET, $_POST);
+        $this->rawInput  = new Input($input);
+
+        $input        = $this->escapeInput($input);
+        $this->input  = new Input($input);
     }
 
     /**
-     * Get an input var, or return all if no key is passed.
+     * Recursively escape an input array.
      *
-     * @param string|null $key The key to fetch
+     * @param array $input The input array
      *
-     * @return mixed The value
+     * @return array The escaped input
      */
-    public function input($key = null)
+    private function escapeInput(array $input = [])
     {
-        if ($key === null) {
-            return $this->input;
+        foreach ($input as $key => &$value) {
+            if (is_array($value)) {
+                $value = $this->escapeInput($value);
+                continue;
+            }
+
+            $value = e($value);
         }
 
-        return isset($this->input[$key]) ? $this->input[$key] : null;
+        return $input;
     }
 }
