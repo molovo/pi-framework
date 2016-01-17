@@ -3,6 +3,7 @@
 namespace Pi\Framework\Http\Request;
 
 use Molovo\Object\Object;
+use Pi\Framework\Application;
 
 class Input extends Object
 {
