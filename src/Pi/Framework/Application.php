@@ -3,10 +3,10 @@
 namespace Pi\Framework;
 
 use Closure;
+use Molovo\Amnesia\Cache;
 use Molovo\Interrogate\Database;
 use Molovo\Traffic\Route;
 use Molovo\Traffic\Router;
-use Pi\Framework\Config;
 use Pi\Framework\Http\Request;
 use Pi\Framework\Http\Response;
 use Whoops;
@@ -85,8 +85,9 @@ class Application
         // Include the app routes
         require APP_ROOT.'routes.php';
 
-        // Bootstrap the database
+        // Bootstrap the database and cache
         Database::bootstrap($this->config->db->toArray());
+        Cache::bootstrap($this->config->cache->toArray());
 
         // Register global view variables
         View::addGlobal('appName', $this->config->app->name);
