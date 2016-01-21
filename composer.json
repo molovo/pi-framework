@@ -3,6 +3,7 @@
   "autoload": {
     "psr-4": {
       "Pi\\Cli\\": "src/Pi/Cli/",
+      "Pi\\Compiler\\": "src/Pi/Compiler/",
       "Pi\\Framework\\": "src/Pi/Framework/"
     },
     "files": [
@@ -16,7 +17,10 @@
     "molovo/interrogate": "^0.2",
     "molovo/amnesia": "^0.1",
     "molovo/object": "^0.2",
-    "filp/whoops": "^1.1"
+    "filp/whoops": "^1.1",
+    "tedivm/jshrink": "~1.0",
+    "coffeescript/coffeescript": "^1.3",
+    "richthegeek/phpsass": "^1.0"
   },
   "minimum-stability": "dev"
 }

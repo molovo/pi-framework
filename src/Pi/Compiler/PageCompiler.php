@@ -1,6 +1,6 @@
 <?php
 
-namespace Pi\Cli\StaticCompiler;
+namespace Pi\Compiler;
 
 use Closure;
 use Molovo\Traffic\Router;
@@ -68,6 +68,16 @@ class PageCompiler extends Application
     }
 
     /**
+     * The main application checks that a valid route is found.
+     * Since we're not properly running the application a route,
+     * we override this method to do nothing, so that the 404
+     * page is not returned.
+     */
+    protected function checkRoute()
+    {
+    }
+
+    /**
      * Register the error handler for the application.
      */
     private function registerErrorHandler()
@@ -87,7 +97,7 @@ class PageCompiler extends Application
      * @param Closure $callback A callback which provides vars to be
      *                          injected into the route placeholders
      */
-    private function compile($route, $data, $callback)
+    public function compile($route, $data, $callback)
     {
         // Loop through the provided data
         foreach ($data as $key => $value) {
