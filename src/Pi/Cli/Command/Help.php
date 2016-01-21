@@ -29,7 +29,7 @@ class Help implements Command
      */
     public static function execute($app)
     {
-        static::$base = BASE_ROOT.'/vendor/molovo/pi-cli/src/templates/help/';
+        static::$base = dirname(__DIR__).'/templates/help/';
         $help         = new static($app->command);
         $help->render();
     }

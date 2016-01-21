@@ -4,6 +4,9 @@ namespace Pi\Cli;
 
 use Molovo\Str\Str;
 use Pi\Cli\Exceptions\CommandNotFoundException;
+use Pi\Framework\Config;
+use Whoops;
+use Whoops\Handler\PlainTextHandler;
 
 class Application
 {
@@ -40,6 +43,11 @@ class Application
      */
     public function __construct()
     {
+        // Load the app's config
+        $this->loadConfig();
+
+        $this->registerErrorHandler();
+
         // Get the arguments array
         if (!isset($argv) || $argv === null) {
             $argv = $_SERVER['argv'];
@@ -81,6 +89,38 @@ class Application
         }
 
         return new static;
+    }
+
+    /**
+     * Register the error handler for the application.
+     */
+    private function registerErrorHandler()
+    {
+        $run     = new Whoops\Run;
+        $handler = new PlainTextHandler;
+
+        $run->pushHandler($handler);
+        $run->register();
+    }
+
+    /**
+     * Load and store the application config.
+     *
+     * @return Config
+     */
+    private function loadConfig()
+    {
+        $config = [];
+
+        // Loop through each of the config files and add them
+        // to the main config array
+        foreach (glob(APP_ROOT.'config'.DS.'*.php') as $file) {
+            $key          = str_replace('.php', '', basename($file));
+            $config[$key] = include $file;
+        }
+
+        // Create and store the config object
+        return $this->config = new Config($config);
     }
 
     /**
