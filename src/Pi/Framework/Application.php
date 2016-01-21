@@ -7,6 +7,7 @@ use Molovo\Amnesia\Cache;
 use Molovo\Interrogate\Database;
 use Molovo\Traffic\Route;
 use Molovo\Traffic\Router;
+use Pi\Compiler\Compiler;
 use Pi\Framework\Http\Request;
 use Pi\Framework\Http\Response;
 use Whoops;
@@ -92,11 +93,41 @@ class Application
         // Register global view variables
         View::addGlobal('appName', $this->config->app->name);
 
+        $this->compileAssets();
+
         // Execute routes
         Router::execute();
 
+        $this->checkRoute();
+    }
+
+    /**
+     * Check that a valid route has been found.
+     */
+    protected function checkRoute()
+    {
         if (Router::current() === null) {
             return $this->error(404);
+        }
+    }
+
+    protected function compileAssets()
+    {
+        $classMap = Compiler::$classMap;
+
+        // We don't want to compile pages here
+        unset($classMap['pages']);
+
+        if ($this->config->assets->live) {
+            foreach ($classMap as $scope => $scopeClass) {
+                $config = $this->config->assets->{$scope};
+
+                if ($config) {
+                    $config->clean = $this->config->assets->clean;
+                    $compiler      = new $scopeClass($config);
+                    $compiler->compile();
+                }
+            }
         }
     }
 
