@@ -1,13 +1,13 @@
 {
-  "name": "molovo/pi-framework",
+  "name": "molovo/pug-framework",
   "autoload": {
     "psr-4": {
-      "Pi\\Cli\\": "src/Pi/Cli/",
-      "Pi\\Compiler\\": "src/Pi/Compiler/",
-      "Pi\\Framework\\": "src/Pi/Framework/"
+      "Pug\\Cli\\": "src/Pug/Cli/",
+      "Pug\\Compiler\\": "src/Pug/Compiler/",
+      "Pug\\Framework\\": "src/Pug/Framework/"
     },
     "files": [
-        "src/Pi/Framework/helpers.php"
+        "src/Pug/Framework/helpers.php"
     ]
   },
   "require": {
