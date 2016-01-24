@@ -1,5 +1,5 @@
 {
-  "name": "molovo/pug-framework",
+  "name": "pugphp/framework",
   "autoload": {
     "psr-4": {
       "Pug\\Cli\\": "src/Pug/Cli/",
