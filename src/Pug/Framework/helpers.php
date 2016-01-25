@@ -8,13 +8,13 @@ if (!function_exists('get')) {
      * Bind a route to GET requests.
      *
      * @param string                 $route           The route to register
-     * @param Closure                $callback        The callback to run when
+     * @param string|Closure         $callback        The callback to run when
      *                                                route is matched
      * @param bool|array|Traversable $compileData     Data to compile pages with
      * @param string|Closure         $compileCallback Values to populate URI
      *                                                placeholders with
      */
-    function get($route, Closure $callback, $compileData = null, Closure $compileCallback = null)
+    function get($route, $callback, $compileData = null, $compileCallback = null)
     {
         $application = Application::instance();
         $application->registerRoute('get', $route, $callback, $compileData, $compileCallback);
@@ -26,13 +26,13 @@ if (!function_exists('post')) {
      * Bind a route to POST requests.
      *
      * @param string                 $route           The route to register
-     * @param Closure                $callback        The callback to run when
+     * @param string|Closure         $callback        The callback to run when
      *                                                route is matched
      * @param bool|array|Traversable $compileData     Data to compile pages with
      * @param string|Closure         $compileCallback Values to populate URI
      *                                                placeholders with
      */
-    function post($route, Closure $callback, $compileData = null, Closure $compileCallback = null)
+    function post($route, $callback, $compileData = null, $compileCallback = null)
     {
         $application = Application::instance();
         $application->registerRoute('post', $route, $callback, $compileData, $compileCallback);
@@ -44,13 +44,13 @@ if (!function_exists('put')) {
      * Bind a route to PUT requests.
      *
      * @param string                 $route           The route to register
-     * @param Closure                $callback        The callback to run when
+     * @param string|Closure         $callback        The callback to run when
      *                                                route is matched
      * @param bool|array|Traversable $compileData     Data to compile pages with
      * @param string|Closure         $compileCallback Values to populate URI
      *                                                placeholders with
      */
-    function put($route, Closure $callback, $compileData = null, Closure $compileCallback = null)
+    function put($route, $callback, $compileData = null, $compileCallback = null)
     {
         $application = Application::instance();
         $application->registerRoute('put', $route, $callback, $compileData, $compileCallback);
@@ -62,13 +62,13 @@ if (!function_exists('patch')) {
      * Bind a route to PATCH requests.
      *
      * @param string                 $route           The route to register
-     * @param Closure                $callback        The callback to run when
+     * @param string|Closure         $callback        The callback to run when
      *                                                route is matched
      * @param bool|array|Traversable $compileData     Data to compile pages with
      * @param string|Closure         $compileCallback Values to populate URI
      *                                                placeholders with
      */
-    function patch($route, Closure $callback, $compileData = null, Closure $compileCallback = null)
+    function patch($route, $callback, $compileData = null, $compileCallback = null)
     {
         $application = Application::instance();
         $application->registerRoute('patch', $route, $callback, $compileData, $compileCallback);
@@ -80,13 +80,13 @@ if (!function_exists('head')) {
      * Bind a route to HEAD requests.
      *
      * @param string                 $route           The route to register
-     * @param Closure                $callback        The callback to run when
+     * @param string|Closure         $callback        The callback to run when
      *                                                route is matched
      * @param bool|array|Traversable $compileData     Data to compile pages with
      * @param string|Closure         $compileCallback Values to populate URI
      *                                                placeholders with
      */
-    function head($route, Closure $callback, $compileData = null, Closure $compileCallback = null)
+    function head($route, $callback, $compileData = null, $compileCallback = null)
     {
         $application = Application::instance();
         $application->registerRoute('head', $route, $callback, $compileData, $compileCallback);
@@ -98,13 +98,13 @@ if (!function_exists('delete')) {
      * Bind a route to DELETE requests.
      *
      * @param string                 $route           The route to register
-     * @param Closure                $callback        The callback to run when
+     * @param string|Closure         $callback        The callback to run when
      *                                                route is matched
      * @param bool|array|Traversable $compileData     Data to compile pages with
      * @param string|Closure         $compileCallback Values to populate URI
      *                                                placeholders with
      */
-    function delete($route, Closure $callback, $compileData = null, Closure $compileCallback = null)
+    function delete($route, $callback, $compileData = null, $compileCallback = null)
     {
         $application = Application::instance();
         $application->registerRoute('delete', $route, $callback, $compileData, $compileCallback);
@@ -116,13 +116,13 @@ if (!function_exists('options')) {
      * Bind a route to OPTIONS requests.
      *
      * @param string                 $route           The route to register
-     * @param Closure                $callback        The callback to run when
+     * @param string|Closure         $callback        The callback to run when
      *                                                route is matched
      * @param bool|array|Traversable $compileData     Data to compile pages with
      * @param string|Closure         $compileCallback Values to populate URI
      *                                                placeholders with
      */
-    function options($route, Closure $callback, $compileData = null, Closure $compileCallback = null)
+    function options($route, $callback, $compileData = null, $compileCallback = null)
     {
         $application = Application::instance();
         $application->registerRoute('options', $route, $callback, $compileData, $compileCallback);
@@ -134,13 +134,13 @@ if (!function_exists('any')) {
      * Bind a route to all HTTP requests.
      *
      * @param string                 $route           The route to register
-     * @param Closure                $callback        The callback to run when
+     * @param string|Closure         $callback        The callback to run when
      *                                                route is matched
      * @param bool|array|Traversable $compileData     Data to compile pages with
      * @param string|Closure         $compileCallback Values to populate URI
      *                                                placeholders with
      */
-    function any($route, Closure $callback, $compileData = null, Closure $compileCallback = null)
+    function any($route, $callback, $compileData = null, $compileCallback = null)
     {
         $application = Application::instance();
         $application->registerRoute('any', $route, $callback, $compileData, $compileCallback);
