@@ -8,8 +8,11 @@ use Molovo\Interrogate\Database;
 use Molovo\Traffic\Route;
 use Molovo\Traffic\Router;
 use Pug\Compiler\Compiler;
+use Pug\Framework\Exceptions\Http\InvalidControllerException;
+use Pug\Framework\Exceptions\Http\InvalidControllerMethodException;
 use Pug\Framework\Http\Request;
 use Pug\Framework\Http\Response;
+use ReflectionClass;
 use Whoops;
 use Whoops\Handler\PrettyPageHandler;
 
@@ -191,23 +194,63 @@ class Application
     /**
      * Register a route for the application.
      *
-     * @param string  $method   The method name
-     * @param string  $route    The route to match
-     * @param Closure $callback The callback to run on success
+     * @param string         $method   The method name
+     * @param string         $route    The route to match
+     * @param string|Closure $callback The callback to run on success
      *
      * @return Route
      */
-    public function registerRoute($method, $route, Closure $callback)
+    public function registerRoute($method, $route, $callback)
     {
         $app = $this;
 
         return Router::$method($route, function () use ($app, $callback) {
-            $data = [
-                $app->request,
-                $app->response,
-            ];
-            $args = array_merge($data, func_get_args());
-            $app->respond(call_user_func_array($callback, $args));
+            // If a closure is passed, execute it directly
+            if ($callback instanceof Closure) {
+                // Add the request and response objects to the arguments
+                $data = [
+                    $app->request,
+                    $app->response,
+                ];
+                $args = array_merge($data, func_get_args());
+
+                // Output the results of the callback
+                $app->respond(call_user_func_array($callback, $args));
+            }
+
+            // Get the controller and method name
+            list($class, $method) = explode('@', $callback);
+
+            // If the naked class doesn't exist, prepend it with the namespace
+            if (!class_exists($class)) {
+                $class = APP_NAMESPACE.'Controllers\\'.$class;
+            }
+
+            // If the class still doesn't exist, throw an exception
+            if (!class_exists($class)) {
+                throw new InvalidControllerException('The controller '.$class.' does not exist.');
+            }
+
+            // Create a reflection class for the controller
+            $ref = new ReflectionClass($class);
+
+            // If the controller does not have the requested method,
+            // throw an exception
+            if (!$ref->hasMethod($method)) {
+                throw new InvalidControllerMethodException('The method '.$class.'::'.$method.' does not exist.');
+            }
+
+            // Initialise the controller object
+            $controller = new $class($app->request, $app->response);
+
+            // Get the callback method
+            $method = $ref->getMethod($method);
+
+            // Get the arguments returned by the router
+            $args = func_get_args();
+
+            // Output the response from the controller
+            $app->respond($method->invokeArgs($controller, $args));
         });
     }
 
