@@ -2,6 +2,7 @@
 
 namespace Pug\Framework;
 
+use Parsedown;
 use Pug\Framework\Exceptions\View\ViewNotFoundException;
 
 class View
@@ -33,6 +34,13 @@ class View
     private $content = null;
 
     /**
+     * The layout within which this view will be nested.
+     *
+     * @var string|null
+     */
+    private $layout = null;
+
+    /**
      * Create a new view.
      *
      * @param string $name The name of the view
@@ -41,12 +49,28 @@ class View
     public function __construct($name, array $vars = [])
     {
         $this->name = $name;
-        $this->file = APP_ROOT.'views'.DS.$name.'.php';
-        $this->vars = array_merge(static::$globals, $vars);
 
-        if (!file_exists($this->file)) {
-            throw new ViewNotFoundException('The view "'.$name.'" does not exist');
+        $path = APP_ROOT.'views'.DS.$name;
+
+        $files = array_merge(glob($path.'.*'), glob($path));
+
+        foreach ($files as $i => $file) {
+            if (is_dir($file)) {
+                unset($files[$i]);
+            }
         }
+
+        if (sizeof($files) > 1) {
+            throw new ViewNotFoundException('Name "'.$name.'" matches multiple views. Please be more specific.');
+        }
+
+        if (sizeof($files) === 0) {
+            throw new ViewNotFoundException('The view "'.$name.'" does not exist.');
+        }
+
+        $this->file = $files[0];
+        $this->type = pathinfo($this->file, PATHINFO_EXTENSION);
+        $this->vars = array_merge(static::$globals, $vars);
     }
 
     /**
@@ -73,6 +97,16 @@ class View
     }
 
     /**
+     * Set the layout within which the view will be nested.
+     *
+     * @param string $name The path to the layout view
+     */
+    public function setLayout($name)
+    {
+        $this->layout = $name;
+    }
+
+    /**
      * Render the contents of a view.
      *
      * @param bool $useCached Whether to use the cached version if available
@@ -85,13 +119,39 @@ class View
             return $this->content;
         }
 
+        if (isset($this->vars['layout'])) {
+            $this->layout = $this->vars['layout'];
+            unset($this->vars['layout']);
+        }
+
         foreach ($this->vars as $key => $value) {
             $$key = $value;
         }
 
-        ob_start();
-        include $this->file;
+        switch ($this->type) {
+            case 'md':
+            case 'markdown':
+                $parser   = new Parsedown;
+                $markdown = file_get_contents($this->file);
 
-        return $this->content = ob_get_clean();
+                $this->content = $parser->text($markdown);
+                break;
+            case 'php':
+            default:
+                ob_start();
+                include $this->file;
+
+                $this->content = ob_get_clean();
+                break;
+        }
+
+        if ($this->layout !== null) {
+            $vars            = $this->vars;
+            $vars['content'] = $this->content;
+
+            return (new self($this->layout, $vars))->render();
+        }
+
+        return $this->content;
     }
 }
