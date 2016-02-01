@@ -60,11 +60,11 @@ class View
             }
         }
 
-        if (sizeof($files) > 1) {
+        if (count($files) > 1) {
             throw new ViewNotFoundException('Name "'.$name.'" matches multiple views. Please be more specific.');
         }
 
-        if (sizeof($files) === 0) {
+        if (count($files) === 0) {
             throw new ViewNotFoundException('The view "'.$name.'" does not exist.');
         }
 

@@ -38,7 +38,7 @@ class CoffeeScriptCompiler implements AssetCompilerInterface
 
             // If concatenating, write to the file pointer
             if ($concatenate) {
-                fputs($output, $js);
+                fwrite($output, $js);
                 continue;
             }
 
