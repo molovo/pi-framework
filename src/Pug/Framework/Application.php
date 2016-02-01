@@ -95,13 +95,12 @@ class Application
 
         // Register global view variables
         View::addGlobal('appName', $this->config->app->name);
+        View::addGlobal('app', $this);
 
         $this->compileAssets();
 
         // Execute routes
         Router::execute();
-
-        $this->checkRoute();
     }
 
     /**
@@ -114,14 +113,17 @@ class Application
         }
     }
 
+    /**
+     * Compile the assets for the application.
+     */
     protected function compileAssets()
     {
-        $classMap = Compiler::$classMap;
-
-        // We don't want to compile pages here
-        unset($classMap['pages']);
-
         if ($this->config->assets->live) {
+            $classMap = Compiler::$classMap;
+
+            // We don't want to compile pages here
+            unset($classMap['pages']);
+
             foreach ($classMap as $scope => $scopeClass) {
                 $config = $this->config->assets->{$scope};
 
@@ -197,10 +199,15 @@ class Application
      * @param string         $method   The method name
      * @param string         $route    The route to match
      * @param string|Closure $callback The callback to run on success
+     * @param mixed          $compile  Boolean for whether the route should be
+     *                                 compiled, or a traversible dataset to
+     *                                 compile the route for
+     * @param mixed          $vars     Variables to substitute into the route
+     *                                 when compiling
      *
      * @return Route
      */
-    public function registerRoute($method, $route, $callback)
+    public function registerRoute($method, $route, Closure $callback, $compile = null, $vars = null)
     {
         $app = $this;
 
