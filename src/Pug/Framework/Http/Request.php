@@ -36,11 +36,13 @@ class Request
         $this->router = new Router;
         $this->method = $this->router->requestMethod();
 
-        $input           = array_merge($_GET, $_POST);
-        $this->rawInput  = new Input($input);
+        $input          = array_merge($_GET, $_POST);
+        $this->rawInput = new Input($input);
 
-        $input        = $this->escapeInput($input);
-        $this->input  = new Input($input);
+        $input       = $this->escapeInput($input);
+        $this->input = new Input($input);
+
+        $this->uri = $_SERVER['REQUEST_URI'];
     }
 
     /**
