@@ -33,7 +33,7 @@ class CssCompiler implements AssetCompilerInterface
 
             // If concatenating, write to the file pointer
             if ($concatenate) {
-                fputs($output, $css);
+                fwrite($output, $css);
                 continue;
             }
 
