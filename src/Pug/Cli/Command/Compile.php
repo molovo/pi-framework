@@ -3,6 +3,8 @@
 namespace Pug\Cli\Command;
 
 use Pug\Cli\Interfaces\Command;
+use Pug\Cli\Prompt;
+use Pug\Cli\Prompt\ANSI;
 use Pug\Compiler\Compiler;
 
 class Compile implements Command
@@ -35,7 +37,7 @@ class Compile implements Command
         }
 
         if ($scope === 'assets') {
-            $scopes = ['css'];
+            $scopes = ['css', 'coffee', 'js', 'sass'];
         }
 
         if (!is_array($scopes)) {
@@ -44,12 +46,24 @@ class Compile implements Command
 
         foreach ($scopes as $scope) {
             $scopeClass = Compiler::$classMap[$scope];
-            $config     = $app->config->assets->{$scope};
+
+            if ($scope === 'pages') {
+                $msg = 'Compiling '.ucwords($scope).'...';
+                Prompt::output(ANSI::fg(str_pad($msg, 22), ANSI::GRAY));
+                $scopeClass::bootstrap();
+                Prompt::outputend(ANSI::fg(' done', ANSI::GREEN));
+                continue;
+            }
+
+            $config = $app->config->assets->{$scope};
 
             if ($config) {
                 $config->clean = $app->config->assets->clean;
                 $compiler      = new $scopeClass($config);
+                $msg           = 'Compiling '.ucwords($scope).'...';
+                Prompt::output(ANSI::fg(str_pad($msg, 22), ANSI::GRAY));
                 $compiler->compile();
+                Prompt::outputend(ANSI::fg(' done', ANSI::GREEN));
             }
         }
     }
