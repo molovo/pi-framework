@@ -86,16 +86,16 @@ class Application
         // Register the error handler
         $this->registerErrorHandler();
 
+        // Register global view variables
+        View::addGlobal('appName', $this->config->app->name);
+        View::addGlobal('app', $this);
+
         // Include the app routes
         require APP_ROOT.'routes.php';
 
         // Bootstrap the database and cache
         Database::bootstrap($this->config->db->toArray());
         Cache::bootstrap($this->config->cache->toArray());
-
-        // Register global view variables
-        View::addGlobal('appName', $this->config->app->name);
-        View::addGlobal('app', $this);
 
         $this->compileAssets();
 
@@ -207,7 +207,7 @@ class Application
      *
      * @return Route
      */
-    public function registerRoute($method, $route, Closure $callback, $compile = null, $vars = null)
+    public function registerRoute($method, $route, $callback, $compile = null, $vars = [])
     {
         $app = $this;
 
