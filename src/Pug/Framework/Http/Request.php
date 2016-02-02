@@ -29,6 +29,13 @@ class Request
     public $router = null;
 
     /**
+     * The current URI.
+     *
+     * @var string|null
+     */
+    public $uri = null;
+
+    /**
      * Create a new request for the application.
      */
     public function __construct()
