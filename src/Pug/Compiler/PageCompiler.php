@@ -5,6 +5,8 @@ namespace Pug\Compiler;
 use Closure;
 use Molovo\Traffic\Router;
 use Pug\Framework\Application;
+use ReflectionClass;
+use Traversable;
 use Whoops;
 use Whoops\Handler\PlainTextHandler;
 
@@ -26,21 +28,21 @@ class PageCompiler extends Application
      * to match the route, executing it, and then writing the response to a file
      * matching the spoofed URL.
      *
-     * @param string  $method          The method name
-     * @param string  $route           The route to match
-     * @param Closure $callback        The callback to run on success
-     * @param mixed   $compileData     An iteratable dataset to compile for
-     * @param Closure $compileCallback A callback which provides vars to be
-     *                                 injected into the route placeholders
+     * @param string                 $method   The method name
+     * @param string                 $route    The route to match
+     * @param Closure                $callback The callback to run on success
+     * @param bool|array|Traversable $compile  An iteratable dataset to compile
+     * @param Closure                $vars     A callback which provides vars to
+     *                                         be injected into the route
      *
      * @return Route
      */
-    public function registerRoute($method, $route, Closure $callback, $compileData = null, Closure $compileCallback = null)
+    public function registerRoute($method, $route, $callback, $compile = null, $vars = [])
     {
         $app = $this;
 
         // We only really want to compile get requests
-        if ($method !== Router::GET || !$compileData) {
+        if ($method !== Router::GET || !$compile) {
             return;
         }
 
@@ -48,14 +50,59 @@ class PageCompiler extends Application
         // callback which returns the output from the callback, rather than
         // echoing it to the output buffer
         $compiledRoute = Router::$method($route, function () use ($app, $callback) {
-            $data = [
-                $app->request,
-                $app->response,
-            ];
-            $args = array_merge($data, func_get_args());
+            $output = null;
+
+            // If a closure is passed, execute it directly
+            if ($callback instanceof Closure) {
+                // Add the request and response objects to the arguments
+                $data = [
+                    $app->request,
+                    $app->response,
+                ];
+                $args = array_merge($data, func_get_args());
+
+                // Output the results of the callback
+                $output = call_user_func_array($callback, $args);
+            }
+
+            if (is_string($callback)) {
+                // Get the controller and method name
+                list($class, $method) = explode('@', $callback);
+
+                // If the naked class doesn't exist, prepend it with the namespace
+                if (!class_exists($class, false)) {
+                    $class = APP_NAMESPACE.'Controllers\\'.$class;
+                }
+
+                // If the class still doesn't exist, throw an exception
+                if (!class_exists($class)) {
+                    throw new InvalidControllerException('The controller '.$class.' does not exist.');
+                }
+
+                // Create a reflection class for the controller
+                $ref = new ReflectionClass($class);
+
+                // If the controller does not have the requested method,
+                // throw an exception
+                if (!$ref->hasMethod($method)) {
+                    throw new InvalidControllerMethodException('The method '.$class.'::'.$method.' does not exist.');
+                }
+
+                // Initialise the controller object
+                $controller = new $class($app->request, $app->response);
+
+                // Get the callback method
+                $method = $ref->getMethod($method);
+
+                // Get the arguments returned by the router
+                $args = func_get_args();
+
+                // Output the response from the controller
+                $output = $method->invokeArgs($controller, $args);
+            }
 
             ob_start();
-            echo call_user_func_array($callback, $args);
+            echo $output;
 
             while (ob_get_level() > 1) {
                 echo ob_get_clean();
@@ -64,7 +111,7 @@ class PageCompiler extends Application
             return ob_get_clean();
         });
 
-        return $this->compile($compiledRoute, $compileData, $compileCallback);
+        return $this->compile($compiledRoute, $compile, $vars);
     }
 
     /**
@@ -92,21 +139,35 @@ class PageCompiler extends Application
     /**
      * Execute a compiled route, and store the output to a file.
      *
-     * @param Route   $route    The compiled route
-     * @param mixed   $data     An iteratable dataset to compile for
-     * @param Closure $callback A callback which provides vars to be
-     *                          injected into the route placeholders
+     * @param Route         $route   The compiled route
+     * @param mixed         $compile Bool, or an iteratable dataset to compile
+     * @param array|Closure $vars    An array of vars, or a callback which
+     *                               provides vars to be injected into the
+     *                               route placeholders
      */
-    public function compile($route, $data, $callback)
+    public function compile($route, $data, $vars)
     {
+        if ($data === true) {
+            $data = [$data];
+        }
+
+        if (!(is_array($data) || $data instanceof Traversable)) {
+            return;
+        }
+
         // Loop through the provided data
         foreach ($data as $key => $value) {
-            // Run the compile callback to get the vars to include in the URI
-            $vars = $callback($value, $key);
+            $params = $vars;
+
+            if ($vars instanceof Closure) {
+                // Run the compile callback to get the vars to include in the URI
+                $params = $vars($value, $key);
+            }
 
             // Pass the vars to the route, and spoof the returned URI
-            $uri                    = $route->uri($vars);
+            $uri                    = $route->uri($params);
             $_SERVER['REQUEST_URI'] = $uri;
+            $this->request->uri     = $uri;
 
             // Execute the route, which now matches, and capture the results
             $result = $route->execute();
@@ -124,24 +185,23 @@ class PageCompiler extends Application
     private function store($uri, $result)
     {
         // Remove the leading slash from the uri
-        if (strpos($uri, '/') === 0) {
-            $uri = substr($uri, 1);
-        }
-
-        // Delete and recreate the static directory
-        $base = PUB_ROOT.'static';
-        if (is_dir($base)) {
-            rmdir($base);
-            mkdir($base, 0755);
+        if (strpos($uri, '/') !== 0) {
+            $uri = '/'.$uri;
         }
 
         // Check if the directory exists, and if not create it
-        if (!is_dir($base.DS.$uri)) {
-            mkdir($base.DS.$uri, 0755, true);
+        $base = PUB_ROOT.'static';
+        $dir  = $base.$uri;
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
         }
 
-        // Write the compiled view to the file
-        $file = fopen($base.DS.$uri.DS.'index.html', 'w');
+        // Get the filename and remove any double slashes,
+        // just in case
+        $filename = $dir.DS.'index.html';
+        $filename = preg_replace('#[\/]+#', '/', $filename);
+
+        $file = fopen($filename, 'w');
         fwrite($file, $result);
         fclose($file);
     }
