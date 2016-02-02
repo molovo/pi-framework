@@ -101,6 +101,8 @@ class Application
 
         // Execute routes
         Router::execute();
+
+        $this->checkRoute();
     }
 
     /**
