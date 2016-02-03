@@ -1,9 +1,9 @@
 <?php
 
-namespace Pug\Framework\Http;
+namespace Pug\Http;
 
 use Molovo\Traffic\Router;
-use Pug\Framework\Http\Request\Input;
+use Pug\Http\Request\Input;
 
 class Request
 {

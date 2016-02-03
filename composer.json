@@ -4,10 +4,12 @@
     "psr-4": {
       "Pug\\Cli\\": "src/Pug/Cli/",
       "Pug\\Compiler\\": "src/Pug/Compiler/",
-      "Pug\\Framework\\": "src/Pug/Framework/"
+      "Pug\\Framework\\": "src/Pug/Framework/",
+      "Pug\\Http\\": "src/Pug/Http/"
     },
     "files": [
-        "src/Pug/Framework/helpers.php"
+        "src/Pug/Framework/helpers.php",
+        "src/Pug/Http/helpers.php"
     ]
   },
   "require": {
@@ -17,7 +19,7 @@
     "molovo/interrogate": "^0.2",
     "molovo/amnesia": "^0.1",
     "molovo/object": "^0.2",
-    "filp/whoops": "^1.1",
+    "filp/whoops": "^2.*",
     "tedivm/jshrink": "~1.0",
     "coffeescript/coffeescript": "^1.3",
     "richthegeek/phpsass": "^1.0",

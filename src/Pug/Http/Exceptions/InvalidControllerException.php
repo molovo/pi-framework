@@ -1,6 +1,6 @@
 <?php
 
-namespace Pug\Framework\Exceptions\Http;
+namespace Pug\Http\Exceptions;
 
 use Pug\Framework\Exceptions\PugException;
 

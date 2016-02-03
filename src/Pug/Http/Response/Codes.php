@@ -1,6 +1,6 @@
 <?php
 
-namespace Pug\Framework\Http\Response;
+namespace Pug\Http\Response;
 
 class Codes
 {

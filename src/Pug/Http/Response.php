@@ -1,8 +1,8 @@
 <?php
 
-namespace Pug\Framework\Http;
+namespace Pug\Http;
 
-use Pug\Framework\Http\Response\Codes;
+use Pug\Http\Response\Codes;
 
 class Response
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Pug\Framework\Http\Request;
+namespace Pug\Http\Request;
 
 use Molovo\Object\Object;
 use Pug\Framework\Application;

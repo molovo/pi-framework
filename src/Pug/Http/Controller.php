@@ -1,6 +1,6 @@
 <?php
 
-namespace Pug\Framework\Http;
+namespace Pug\Http;
 
 class Controller
 {
