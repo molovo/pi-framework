@@ -213,7 +213,9 @@ class Application
     {
         $app = $this;
 
-        return Router::$method($route, function () use ($app, $callback) {
+        $base_uri = $app->config->app->base_uri;
+
+        return Router::$method($base_uri.$route, function () use ($app, $callback) {
             // If a closure is passed, execute it directly
             if ($callback instanceof Closure) {
                 // Add the request and response objects to the arguments

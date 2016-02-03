@@ -41,6 +41,8 @@ class PageCompiler extends Application
     {
         $app = $this;
 
+        $base_uri = $app->config->app->base_uri;
+
         // We only really want to compile get requests
         if ($method !== Router::GET || !$compile) {
             return;
@@ -49,7 +51,7 @@ class PageCompiler extends Application
         // Compile the route as if we were on the front end, but use a different
         // callback which returns the output from the callback, rather than
         // echoing it to the output buffer
-        $compiledRoute = Router::$method($route, function () use ($app, $callback) {
+        $compiledRoute = Router::$method($base_uri.$route, function () use ($app, $callback) {
             $output = null;
 
             // If a closure is passed, execute it directly
