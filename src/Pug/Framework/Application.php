@@ -102,7 +102,9 @@ class Application
         // Execute routes
         Router::execute();
 
-        $this->checkRoute();
+        if (PHP_SAPI !== 'cli') {
+            $this->checkRoute();
+        }
     }
 
     /**
@@ -215,7 +217,17 @@ class Application
 
         $base_uri = $app->config->app->base_uri;
 
-        return Router::$method($base_uri.$route, function () use ($app, $callback) {
+        if (is_array($route)) {
+            list($route, $name) = $route;
+        }
+
+        $route = $base_uri.$route;
+
+        if (isset($name)) {
+            $route = [$route, $name];
+        }
+
+        return Router::$method($route, function () use ($app, $callback) {
             // If a closure is passed, execute it directly
             if ($callback instanceof Closure) {
                 // Add the request and response objects to the arguments
