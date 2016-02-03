@@ -2,6 +2,7 @@
 
 namespace Pug\Cli\Command;
 
+use Pug\Cli\Application;
 use Pug\Cli\Interfaces\Command;
 use Pug\Cli\Prompt;
 use Pug\Cli\Prompt\ANSI;
@@ -16,7 +17,7 @@ class Compile implements Command
      *
      * @return mixed
      */
-    public static function execute($app)
+    public static function execute(Application $app)
     {
         $args = $app->args;
 

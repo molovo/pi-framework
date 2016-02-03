@@ -2,6 +2,7 @@
 
 namespace Pug\Cli\Command;
 
+use Pug\Cli\Application;
 use Pug\Cli\Interfaces\Command;
 
 class Help implements Command
@@ -27,7 +28,7 @@ class Help implements Command
      *
      * @return mixed
      */
-    public static function execute($app)
+    public static function execute(Application $app)
     {
         static::$base = dirname(__DIR__).'/templates/help/';
         $help         = new static($app->command);
@@ -41,8 +42,8 @@ class Help implements Command
      */
     public function __construct($command)
     {
-        $this->command   = $command;
-        $this->template  = static::$base.$this->command.'.php';
+        $this->command  = $command;
+        $this->template = static::$base.$this->command.'.php';
     }
 
     /**

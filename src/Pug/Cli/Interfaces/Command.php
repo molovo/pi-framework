@@ -15,5 +15,5 @@ interface Command
      *
      * @return mixed
      */
-    public static function execute($app);
+    public static function execute(Application $app);
 }
