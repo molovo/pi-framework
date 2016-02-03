@@ -19,7 +19,7 @@
     "molovo/interrogate": "^0.2",
     "molovo/amnesia": "^0.1",
     "molovo/object": "^0.2",
-    "filp/whoops": "^2.*",
+    "filp/whoops": "2.*",
     "tedivm/jshrink": "~1.0",
     "coffeescript/coffeescript": "^1.3",
     "richthegeek/phpsass": "^1.0",
