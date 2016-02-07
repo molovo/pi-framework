@@ -49,7 +49,9 @@ class Request
         $input       = $this->escapeInput($input);
         $this->input = new Input($input);
 
-        $this->uri = $_SERVER['REQUEST_URI'];
+        if (isset($_SERVER['REQUEST_URI'])) {
+            $this->uri = $_SERVER['REQUEST_URI'];
+        }
     }
 
     /**
