@@ -2,6 +2,7 @@
 
 namespace Pug\Framework;
 
+use Mustache_Engine as Mustache;
 use Parsedown;
 use Pug\Framework\Exceptions\View\ViewNotFoundException;
 
@@ -182,6 +183,11 @@ class View
                 $markdown = file_get_contents($this->file);
 
                 $this->content = $parser->text($markdown);
+                break;
+            case 'mustache':
+                $parser        = new Mustache;
+                $mustache      = file_get_contents($this->file);
+                $this->content = $parser->render($mustache, $vars);
                 break;
             case 'php':
             default:
