@@ -39,7 +39,7 @@ trait AssetCompiler
         $this->files = $this->prepareSourceFiles($config->src);
 
         // Store the destination
-        $this->dest = $config->dest;
+        $this->dest = PUB_ROOT.'assets/'.$config->dest;
 
         if (!is_dir($this->dest)) {
             mkdir($this->dest, 0700, true);
@@ -80,6 +80,9 @@ trait AssetCompiler
 
         // Loop through each of the source files
         foreach ($paths as $path) {
+            // Add the root prefix
+            $path = APP_ROOT.'assets/'.$path;
+
             // Pass to glob to get a list of matching filenames
             $matches = glob($path);
 
