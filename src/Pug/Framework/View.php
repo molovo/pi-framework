@@ -20,6 +20,13 @@ class View
     public static $globals = [];
 
     /**
+     * Global rendering options which are used for all views.
+     *
+     * @var array
+     */
+    public static $globalOptions = [];
+
+    /**
      * The full file path for the view.
      *
      * @var string|null
@@ -39,6 +46,20 @@ class View
      * @var string|null
      */
     private $layout = null;
+
+    /**
+     * The vars which will be passed to view templates.
+     *
+     * @var array
+     */
+    private $vars = [];
+
+    /**
+     * The options which define how the view is rendered.
+     *
+     * @var array
+     */
+    private $options = [];
 
     /**
      * Create a new view.
