@@ -13,6 +13,7 @@ use Pug\Http\Exceptions\InvalidControllerMethodException;
 use Pug\Http\Request;
 use Pug\Http\Response;
 use ReflectionClass;
+use ReflectionFunction;
 use Whoops;
 use Whoops\Handler\PrettyPageHandler;
 
@@ -200,7 +201,7 @@ class Application
     /**
      * Register a route for the application.
      *
-     * @param string         $method   The method name
+     * @param string         $verb     The method name
      * @param string         $route    The route to match
      * @param string|Closure $callback The callback to run on success
      * @param mixed          $compile  Boolean for whether the route should be
@@ -211,9 +212,12 @@ class Application
      *
      * @return Route
      */
-    public function registerRoute($method, $route, $callback, $compile = null, $vars = [])
+    public function registerRoute($verb, $route, $callback, $compile = null, $vars = [])
     {
         $app = $this;
+
+        $controller = null;
+        $method     = null;
 
         $base_uri = $app->config->app->base_uri;
 
@@ -227,20 +231,24 @@ class Application
             $route = [$route, $name];
         }
 
-        return Router::$method($route, function () use ($app, $callback) {
-            // If a closure is passed, execute it directly
-            if ($callback instanceof Closure) {
-                // Add the request and response objects to the arguments
-                $data = [
-                    $app->request,
-                    $app->response,
-                ];
-                $args = array_merge($data, func_get_args());
+        $data = [];
 
-                // Output the results of the callback
-                $app->respond(call_user_func_array($callback, $args));
-            }
+        // If a closure is passed, execute it directly
+        if ($callback instanceof Closure) {
+            // When we're using a closure, the request and response are returned
+            // with the arguments
+            $data = [
+                $app->request,
+                $app->response,
+            ];
 
+            // Wrap a ReflectionFunction around the controller so we can use
+            // invokeArgs() later
+            $callback = new ReflectionFunction($callback);
+        }
+
+        // If a string is passed, then it points to a controller
+        if (is_string($callback)) {
             // Get the controller and method name
             list($class, $method) = explode('@', $callback);
 
@@ -267,13 +275,19 @@ class Application
             $controller = new $class($app->request, $app->response);
 
             // Get the callback method
-            $method = $ref->getMethod($method);
+            $callback = $ref->getMethod($method);
+        }
 
-            // Get the arguments returned by the router
-            $args = func_get_args();
+        return Router::$verb($route, function () use ($app, $callback, $data, $controller) {
+            // Merge the arguments returned from the router
+            $data = array_merge($data, func_get_args());
 
-            // Output the response from the controller
-            $app->respond($method->invokeArgs($controller, $args));
+            // Execute the callback, and output the result in the response
+            if ($controller !== null) {
+                return $app->respond($callback->invokeArgs($controller, $data));
+            }
+
+            return $app->respond($callback->invokeArgs($data));
         });
     }
 
