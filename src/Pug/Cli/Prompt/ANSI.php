@@ -102,4 +102,16 @@ class ANSI
     {
         return "\e[0;9m".$str."\e[0;29m";
     }
+
+    /**
+     * Strip ANSI escape codes from a string.
+     *
+     * @param string $str The string to strip
+     *
+     * @return string The stripped string
+     */
+    public static function strip($str)
+    {
+        return preg_replace('/(?:\\e\[0;\d+m)(.*)(?:\\e\[0;\d+m)/', '$1', $str);
+    }
 }
