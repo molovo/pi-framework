@@ -3,6 +3,7 @@
 namespace Pug\Cli\Command;
 
 use Pug\Cli\Application;
+use Pug\Cli\Exceptions\FileNotFoundException;
 use Pug\Cli\Interfaces\Command;
 
 class Help implements Command
@@ -31,7 +32,7 @@ class Help implements Command
     public static function execute(Application $app)
     {
         static::$base = dirname(__DIR__).'/templates/help/';
-        $help         = new static($app->command);
+        $help         = new static($app->command ?: 'help');
         $help->render();
     }
 

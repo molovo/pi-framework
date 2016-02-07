@@ -3,7 +3,8 @@
 namespace Pug\Cli;
 
 use Molovo\Str\Str;
-use Pug\Cli\Exceptions\CommandNotFoundException;
+use Pug\Cli\Command\Help;
+use Pug\Cli\Prompt\ANSI;
 use Pug\Framework\Config;
 use Whoops;
 use Whoops\Handler\PlainTextHandler;
@@ -64,9 +65,6 @@ class Application
 
         // Save environment variables
         $this->env = $_ENV;
-
-        // Execute the command
-        $this->executeCommand();
     }
 
     /**
@@ -75,6 +73,7 @@ class Application
     public static function bootstrap()
     {
         static::$instance = new static;
+        static::$instance->executeCommand();
     }
 
     /**
@@ -126,14 +125,16 @@ class Application
     /**
      * Execute the command.
      */
-    private function executeCommand()
+    public function executeCommand()
     {
         $command = $this->command;
 
         $class = 'Pug\\Cli\\Command\\'.Str::camelCaps($command);
 
         if (!class_exists($class)) {
-            throw new CommandNotFoundException('The command '.$command.' could not be found.');
+            Prompt::outputend(ANSI::fg('The command "'.$command.'" could not be found.'."\n", ANSI::RED));
+            $this->command = 'help';
+            Help::execute($this);
         }
 
         $class::execute($this);
