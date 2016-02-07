@@ -24,14 +24,28 @@ class View
      *
      * @var array
      */
-    public static $globals = [];
+    private static $globals = [];
 
     /**
      * Global rendering options which are used for all views.
      *
      * @var array
      */
-    public static $globalOptions = [];
+    private static $globalOptions = [];
+
+    /**
+     * The parser for rendering markdown views.
+     *
+     * @var Parsedown|null
+     */
+    private static $markdownParser = null;
+
+    /**
+     * The parser for rendering mustache templates.
+     *
+     * @var Mustache|null
+     */
+    private static $mustacheParser = null;
 
     /**
      * The full file path for the view.
@@ -184,12 +198,15 @@ class View
             case 'md':
             case 'markdown':
                 // Set up the Parsedown parses
-                $parser = new Parsedown;
+                if (static::$markdownParser === null) {
+                    static::$markdownParser = new Parsedown;
+                }
 
                 // Load the contents of the view
                 $markdown = file_get_contents($this->file);
 
                 // Render and store the HTML
+                $parser        = static::$markdownParser;
                 $this->content = $parser->text($markdown);
                 break;
 
@@ -197,19 +214,27 @@ class View
             case 'mhtml':
             case 'mustache':
                 // Set up the Mustache parser
-                $parser = new Mustache([
-                    // Set the cache directory for increased performance
-                    'cache' => self::CACHE_DIR,
-
-                    // Load partials from our views directory
-                    'loader' => new MustacheLoader(self::VIEW_DIR, [
+                if (static::$mustacheParser === null) {
+                    $loader = new MustacheLoader(self::VIEW_DIR, [
                         // We've already added the extension when determining
                         // the rendering engine to use, so stop Mustache from
                         // adding another one
                         'extension' => '',
-                    ]),
-                ]);
-                $this->content = $parser->render($this->file, $vars);
+                    ]);
+
+                    static::$mustacheParser = new Mustache([
+                        // Set the cache directory for increased performance
+                        'cache' => self::CACHE_DIR,
+
+                        // Load partials from our views directory
+                        'partials_loader' => $loader,
+                    ]);
+                }
+
+                $mustache = file_get_contents($this->file);
+
+                $parser        = static::$mustacheParser;
+                $this->content = $parser->render($mustache, $vars);
                 break;
 
             // The view is a simple PHP file
