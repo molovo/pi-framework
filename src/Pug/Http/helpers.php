@@ -1,5 +1,6 @@
 <?php
 
+use Molovo\Str\Str;
 use Pug\Framework\Application;
 
 if (!function_exists('get')) {
@@ -143,5 +144,29 @@ if (!function_exists('any')) {
     {
         $application = Application::instance();
         $application->registerRoute('any', $route, $callback, $compile, $vars);
+    }
+}
+
+if (!function_exists('resource')) {
+    function resource($route, $controller)
+    {
+        $application = Application::instance();
+
+        if (!is_array($route)) {
+            $route = [
+                $route,
+                Str::snakeCase(str_replace('Controller', '', $controller)),
+            ];
+        }
+
+        list($route, $name) = $route;
+
+        get([$route, $name], $controller.'@index');
+        post([$route, $name.'.create'], $controller.'@create');
+        get([$route.'/{id:int}', $name.'.show'], $controller.'@show');
+        post([$route.'/{id:int}', $name.'.update'], $controller.'@update');
+        get([$route.'/{id:int}/edit', $name.'.edit'], $controller.'@edit');
+        delete([$route.'/{id:int}', $name.'.delete'], $controller.'@destroy');
+        post([$route.'/{id:int}/destroy', $name.'.destroy'], $controller.'@destroy');
     }
 }
