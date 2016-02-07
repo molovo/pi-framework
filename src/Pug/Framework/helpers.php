@@ -6,14 +6,15 @@ if (!function_exists('view')) {
     /**
      * Compile a view and return the rendered output.
      *
-     * @param string $name The name of the view (relative to app/views)
-     * @param array  $vars Variables to pass to the view
+     * @param string $name    The name of the view (relative to app/views)
+     * @param array  $vars    Variables to pass to the view
+     * @param array  $options Rendering options to pass to the view
      *
      * @return string The compiled HTML
      */
-    function view($name, array $vars = [])
+    function view($name, array $vars = [], array $options = [])
     {
-        $view = new View($name, $vars);
+        $view = new View($name, $vars, $options);
 
         return $view->render();
     }

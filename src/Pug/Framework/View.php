@@ -3,6 +3,7 @@
 namespace Pug\Framework;
 
 use Mustache_Engine as Mustache;
+use Mustache_Loader_FilesystemLoader as MustacheLoader;
 use Parsedown;
 use Pug\Framework\Exceptions\View\ViewNotFoundException;
 
@@ -11,7 +12,12 @@ class View
     /**
      * The directory in which views are found.
      */
-    const VIEW_DIR = APP_ROOT.'views';
+    const VIEW_DIR = APP_ROOT.'views/';
+
+    /**
+     * The directory in which cached views are stored.
+     */
+    const CACHE_DIR = APP_ROOT.'storage/views/';
 
     /**
      * Global variables which are included in all views.
@@ -72,7 +78,7 @@ class View
     {
         $this->name = $name;
 
-        $path = APP_ROOT.'views'.DS.$name;
+        $path = self::VIEW_DIR.$name;
 
         $files = array_merge(glob($path.'.*'), glob($path));
 
@@ -93,7 +99,12 @@ class View
         $this->file    = $files[0];
         $this->type    = pathinfo($this->file, PATHINFO_EXTENSION);
         $this->vars    = array_merge(static::$globals, $vars);
-        $this->options = array_merge(static::$globalOptions, $vars);
+        $this->options = array_merge(static::$globalOptions, $options);
+
+        if (isset($this->options['layout'])) {
+            $this->layout = $this->options['layout'];
+            unset($this->options['layout']);
+        }
     }
 
     /**
@@ -165,36 +176,65 @@ class View
             return $this->content;
         }
 
-        if (isset($this->options['layout'])) {
-            $this->layout = $this->options['layout'];
-            unset($this->options['layout']);
-        }
-
         $vars = array_merge($this->vars, $vars);
 
-        foreach ($vars as $key => $value) {
-            $$key = $value;
-        }
-
         switch ($this->type) {
+
+            // The view is a markdown file
             case 'md':
             case 'markdown':
-                $parser   = new Parsedown;
+                // Set up the Parsedown parses
+                $parser = new Parsedown;
+
+                // Load the contents of the view
                 $markdown = file_get_contents($this->file);
 
+                // Render and store the HTML
                 $this->content = $parser->text($markdown);
                 break;
+
+            // The view is a mustache template
+            case 'mhtml':
             case 'mustache':
-                $parser        = new Mustache;
-                $mustache      = file_get_contents($this->file);
-                $this->content = $parser->render($mustache, $vars);
+                // Set up the Mustache parser
+                $parser = new Mustache([
+                    // Set the cache directory for increased performance
+                    'cache' => self::CACHE_DIR,
+
+                    // Load partials from our views directory
+                    'loader' => new MustacheLoader(self::VIEW_DIR, [
+                        // We've already added the extension when determining
+                        // the rendering engine to use, so stop Mustache from
+                        // adding another one
+                        'extension' => '',
+                    ]),
+                ]);
+                $this->content = $parser->render($this->file, $vars);
                 break;
+
+            // The view is a simple PHP file
             case 'php':
             default:
+                // Start an output buffer so that view contents can
+                // be captured
                 ob_start();
-                include $this->file;
 
-                $this->content = ob_get_clean();
+                // Create a closure so that vars can be extracted without
+                // conflicts with variables in the parent scope
+                $render = function ($vars, $file) {
+                    // Extract the vars into local variables so that
+                    // they are accessible in our included view.
+                    extract($vars);
+
+                    // Include the view
+                    include $this->file;
+
+                    // Return the contents of the output buffer
+                    return ob_get_clean();
+                };
+
+                // Render and store the content
+                $this->content = $render($this->vars, $this->file);
                 break;
         }
 
