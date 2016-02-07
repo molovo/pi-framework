@@ -46,7 +46,7 @@ class View
      * @param string $name The name of the view
      * @param array  $vars The variables to include in the view
      */
-    public function __construct($name, array $vars = [])
+    public function __construct($name, array $vars = [], array $options = [])
     {
         $this->name = $name;
 
@@ -68,9 +68,10 @@ class View
             throw new ViewNotFoundException('The view "'.$name.'" does not exist.');
         }
 
-        $this->file = $files[0];
-        $this->type = pathinfo($this->file, PATHINFO_EXTENSION);
-        $this->vars = array_merge(static::$globals, $vars);
+        $this->file    = $files[0];
+        $this->type    = pathinfo($this->file, PATHINFO_EXTENSION);
+        $this->vars    = array_merge(static::$globals, $vars);
+        $this->options = array_merge(static::$globalOptions, $vars);
     }
 
     /**
@@ -97,6 +98,29 @@ class View
     }
 
     /**
+     * Add a global option to be set for all views.
+     *
+     * @param string $key   The key to set
+     * @param mixed  $value The value to set
+     */
+    public static function setGlobalOption($key, $value)
+    {
+        static::$globalOptions[$key] = $value;
+    }
+
+    /**
+     * Unset a global option.
+     *
+     * @param string $key The key to unset
+     */
+    public static function unsetGlobalOption($key)
+    {
+        if (isset(static::$globalOptions[$key])) {
+            unset(static::$globalOptions[$key]);
+        }
+    }
+
+    /**
      * Set the layout within which the view will be nested.
      *
      * @param string $name The path to the layout view
@@ -113,18 +137,20 @@ class View
      *
      * @return string
      */
-    public function render($useCached = true)
+    public function render(array $vars = [], $useCached = false)
     {
         if ($useCached && $this->content !== null) {
             return $this->content;
         }
 
-        if (isset($this->vars['layout'])) {
-            $this->layout = $this->vars['layout'];
-            unset($this->vars['layout']);
+        if (isset($this->options['layout'])) {
+            $this->layout = $this->options['layout'];
+            unset($this->options['layout']);
         }
 
-        foreach ($this->vars as $key => $value) {
+        $vars = array_merge($this->vars, $vars);
+
+        foreach ($vars as $key => $value) {
             $$key = $value;
         }
 
@@ -146,7 +172,6 @@ class View
         }
 
         if ($this->layout !== null) {
-            $vars            = $this->vars;
             $vars['content'] = $this->content;
 
             return (new self($this->layout, $vars))->render();
