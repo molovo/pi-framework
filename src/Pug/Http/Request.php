@@ -41,7 +41,7 @@ class Request
     public function __construct()
     {
         $this->router = new Router;
-        $this->method = $this->router->requestMethod();
+        $this->method = strtoupper($this->router->requestMethod());
 
         $input          = array_merge($_GET, $_POST);
         $this->rawInput = new Input($input);
@@ -73,5 +73,25 @@ class Request
         }
 
         return $input;
+    }
+
+    public function isPost()
+    {
+        return in_array($this->method, ['POST', 'PUT', 'PATCH', 'DELETE']);
+    }
+
+    public function isPut()
+    {
+        return $this->method === 'PUT' || ($this->method === 'POST' && $this->input->_method === 'PUT');
+    }
+
+    public function isPatch()
+    {
+        return $this->method === 'PATCH' || ($this->method === 'POST' && $this->input->_method === 'PATCH');
+    }
+
+    public function isDelete()
+    {
+        return $this->method === 'DELETE' || ($this->method === 'POST' && $this->input->_method === 'DELETE');
     }
 }

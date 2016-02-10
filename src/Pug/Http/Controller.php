@@ -2,6 +2,11 @@
 
 namespace Pug\Http;
 
+use Pug\Framework\Application;
+use Pug\Http\Exceptions\InvalidMiddlewareException;
+use Pug\Http\Interfaces\Middleware;
+use Pug\Http\Middleware\Csrf;
+
 class Controller
 {
     /**
@@ -9,14 +14,23 @@ class Controller
      *
      * @var Request|null
      */
-    private $request = null;
+    protected $request = null;
 
     /**
      * The current response.
      *
      * @var Response|null
      */
-    private $response = null;
+    protected $response = null;
+
+    /**
+     * An array of middleware classes.
+     *
+     * @var Middleware[]
+     */
+    protected $middleware = [
+        Csrf::class,
+    ];
 
     /**
      * Initialise the controller.
@@ -28,5 +42,16 @@ class Controller
     {
         $this->request  = $request;
         $this->response = $response;
+
+        foreach ($this->middleware as $middleware) {
+            if (!((new $middleware) instanceof Middleware)) {
+                throw new InvalidMiddlewareException($middleware.' is not a valid middleware class');
+            }
+
+            if (!$middleware::check()) {
+                // Most middleware classes will throw an exception
+                Application::instance()->error(404);
+            }
+        }
     }
 }

@@ -10,6 +10,7 @@ use Molovo\Traffic\Router;
 use Pug\Compiler\Compiler;
 use Pug\Http\Exceptions\InvalidControllerException;
 use Pug\Http\Exceptions\InvalidControllerMethodException;
+use Pug\Http\Middleware\Csrf;
 use Pug\Http\Request;
 use Pug\Http\Response;
 use ReflectionClass;
@@ -87,16 +88,18 @@ class Application
         // Register the error handler
         $this->registerErrorHandler();
 
-        // Register global view variables
-        View::addGlobal('appName', $this->config->app->name);
-        View::addGlobal('app', $this);
-
         // Include the app routes
         require APP_ROOT.'routes.php';
 
-        // Bootstrap the database and cache
+        // Bootstrap the database, cache and session
         Database::bootstrap($this->config->db->toArray());
         Cache::bootstrap($this->config->cache->toArray());
+        Session::bootstrap($this->config->session);
+
+        // Register global view variables
+        View::addGlobal('appName', $this->config->app->name);
+        View::addGlobal('app', $this);
+        // View::addGlobal('csrf', Csrf::input());
 
         $this->compileAssets();
 
@@ -250,29 +253,26 @@ class Application
         // If a string is passed, then it points to a controller
         if (is_string($callback)) {
             // Get the controller and method name
-            list($class, $method) = explode('@', $callback);
+            list($controller, $method) = explode('@', $callback);
 
             // If the naked class doesn't exist, prepend it with the namespace
-            if (!class_exists($class)) {
-                $class = APP_NAMESPACE.'Controllers\\'.$class;
+            if (!class_exists($controller)) {
+                $controller = APP_NAMESPACE.'Http\\Controllers\\'.$controller;
             }
 
             // If the class still doesn't exist, throw an exception
-            if (!class_exists($class)) {
-                throw new InvalidControllerException('The controller '.$class.' does not exist.');
+            if (!class_exists($controller)) {
+                throw new InvalidControllerException('The controller '.$controller.' does not exist.');
             }
 
             // Create a reflection class for the controller
-            $ref = new ReflectionClass($class);
+            $ref = new ReflectionClass($controller);
 
             // If the controller does not have the requested method,
             // throw an exception
             if (!$ref->hasMethod($method)) {
-                throw new InvalidControllerMethodException('The method '.$class.'::'.$method.' does not exist.');
+                throw new InvalidControllerMethodException('The method '.$controller.'::'.$method.' does not exist.');
             }
-
-            // Initialise the controller object
-            $controller = new $class($app->request, $app->response);
 
             // Get the callback method
             $callback = $ref->getMethod($method);
@@ -284,6 +284,8 @@ class Application
 
             // Execute the callback, and output the result in the response
             if ($controller !== null) {
+                $controller = new $controller($app->request, $app->response);
+
                 return $app->respond($callback->invokeArgs($controller, $data));
             }
 
