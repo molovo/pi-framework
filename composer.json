@@ -4,12 +4,13 @@
     "psr-4": {
       "Pug\\Cli\\": "src/Pug/Cli/",
       "Pug\\Compiler\\": "src/Pug/Compiler/",
+      "Pug\\Crypt\\": "src/Pug/Crypt/",
       "Pug\\Framework\\": "src/Pug/Framework/",
       "Pug\\Http\\": "src/Pug/Http/"
     },
     "files": [
-        "src/Pug/Framework/helpers.php",
-        "src/Pug/Http/helpers.php"
+      "src/Pug/Framework/helpers.php",
+      "src/Pug/Http/helpers.php"
     ]
   },
   "require": {
@@ -24,7 +25,8 @@
     "coffeescript/coffeescript": "^1.3",
     "richthegeek/phpsass": "^1.0",
     "erusev/parsedown": "^1.6",
-    "mustache/mustache": "~2.5"
+    "mustache/mustache": "~2.5",
+    "mustangostang/spyc": "~1.0"
   },
   "minimum-stability": "dev"
 }
