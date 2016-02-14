@@ -3,6 +3,29 @@
 use Molovo\Str\Str;
 use Pug\Framework\Application;
 
+if (!function_exists('route')) {
+    /**
+     * Bind a route.
+     *
+     * @param string|array           $verbs    The HTTP verb(s) to bind to
+     * @param string                 $route    The route to register
+     * @param string|Closure         $callback The callback to run when
+     *                                         route is matched
+     * @param bool|array|Traversable $compile  Data to compile pages with
+     * @param array|Closure          $vars     Values to populate URI
+     *                                         placeholders with
+     */
+    function route($verbs, $route, $callback, $compile = null, $vars = [])
+    {
+        $verbs       = is_array($verbs) ? $verbs : [$verbs];
+        $application = Application::instance();
+
+        foreach ($verbs as $verb) {
+            $application->registerRoute($verb, $route, $callback, $compile, $vars);
+        }
+    }
+}
+
 if (!function_exists('get')) {
     /**
      * Bind a route to GET requests.
