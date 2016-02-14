@@ -10,7 +10,6 @@ use Molovo\Traffic\Router;
 use Pug\Compiler\Compiler;
 use Pug\Http\Exceptions\InvalidControllerException;
 use Pug\Http\Exceptions\InvalidControllerMethodException;
-use Pug\Http\Middleware\Csrf;
 use Pug\Http\Request;
 use Pug\Http\Response;
 use ReflectionClass;
@@ -99,7 +98,7 @@ class Application
         // Register global view variables
         View::addGlobal('appName', $this->config->app->name);
         View::addGlobal('app', $this);
-        // View::addGlobal('csrf', Csrf::input());
+        View::addGlobal('input', $this->request->input);
 
         $this->compileAssets();
 
