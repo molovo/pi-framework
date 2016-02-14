@@ -21,14 +21,14 @@ class Input extends Object
         $input   = $escaped ? $request->input : $request->rawInput;
 
         if (is_string($key) && func_num_args() === 1) {
-            return $input->valueForKey($key);
+            return $input->valueForPath($key);
         }
 
         $keys = is_array($key) ? $key : func_get_args();
 
         $values = [];
         foreach ($keys as $key) {
-            $values[$key] = $input->valueForKey($key);
+            $values[$key] = $input->valueForPath($key);
         }
 
         return $values;
