@@ -5,7 +5,10 @@ namespace Pug\Compiler;
 use Closure;
 use Molovo\Traffic\Router;
 use Pug\Framework\Application;
+use Pug\Http\Exceptions\InvalidControllerException;
+use Pug\Http\Exceptions\InvalidControllerMethodException;
 use ReflectionClass;
+use ReflectionFunction;
 use Traversable;
 use Whoops;
 use Whoops\Handler\PlainTextHandler;
@@ -41,10 +44,8 @@ class PageCompiler extends Application
     {
         $app = $this;
 
-        // We only really want to compile get requests
-        if ($method !== Router::GET || !$compile) {
-            return;
-        }
+        $controller = null;
+        $method     = null;
 
         $base_uri = $app->config->app->base_uri;
 
@@ -58,59 +59,61 @@ class PageCompiler extends Application
             $route = [$route, $name];
         }
 
-        // Compile the route as if we were on the front end, but use a different
-        // callback which returns the output from the callback, rather than
-        // echoing it to the output buffer
-        $compiledRoute = Router::$method($route, function () use ($app, $callback) {
-            $output = null;
+        $data = [];
 
-            // If a closure is passed, execute it directly
-            if ($callback instanceof Closure) {
-                // Add the request and response objects to the arguments
-                $data = [
-                    $app->request,
-                    $app->response,
-                ];
-                $args = array_merge($data, func_get_args());
+        // If a closure is passed, execute it directly
+        if ($callback instanceof Closure) {
+            // When we're using a closure, the request and response are returned
+            // with the arguments
+            $data = [
+                $app->request,
+                $app->response,
+            ];
 
-                // Output the results of the callback
-                $output = call_user_func_array($callback, $args);
+            // Wrap a ReflectionFunction around the controller so we can use
+            // invokeArgs() later
+            $callback = new ReflectionFunction($callback);
+        }
+
+        // If a string is passed, then it points to a controller
+        if (is_string($callback)) {
+            // Get the controller and method name
+            list($controller, $method) = explode('@', $callback);
+
+            // If the naked class doesn't exist, prepend it with the namespace
+            if (!class_exists($controller)) {
+                $controller = APP_NAMESPACE.'Http\\Controllers\\'.$controller;
             }
 
-            if (is_string($callback)) {
-                // Get the controller and method name
-                list($class, $method) = explode('@', $callback);
+            // If the class still doesn't exist, throw an exception
+            if (!class_exists($controller)) {
+                throw new InvalidControllerException('The controller '.$controller.' does not exist.');
+            }
 
-                // If the naked class doesn't exist, prepend it with the namespace
-                if (!class_exists($class, false)) {
-                    $class = APP_NAMESPACE.'Controllers\\'.$class;
-                }
+            // Create a reflection class for the controller
+            $ref = new ReflectionClass($controller);
 
-                // If the class still doesn't exist, throw an exception
-                if (!class_exists($class)) {
-                    throw new InvalidControllerException('The controller '.$class.' does not exist.');
-                }
+            // If the controller does not have the requested method,
+            // throw an exception
+            if (!$ref->hasMethod($method)) {
+                throw new InvalidControllerMethodException('The method '.$controller.'::'.$method.' does not exist.');
+            }
 
-                // Create a reflection class for the controller
-                $ref = new ReflectionClass($class);
+            // Get the callback method
+            $callback = $ref->getMethod($method);
+        }
 
-                // If the controller does not have the requested method,
-                // throw an exception
-                if (!$ref->hasMethod($method)) {
-                    throw new InvalidControllerMethodException('The method '.$class.'::'.$method.' does not exist.');
-                }
+        $compiledRoute = Router::$verb($route, function () use ($app, $callback, $data, $controller) {
+            // Merge the arguments returned from the router
+            $data = array_merge($data, func_get_args());
 
-                // Initialise the controller object
-                $controller = new $class($app->request, $app->response);
+            // Execute the callback, and output the result in the response
+            if ($controller !== null) {
+                $controller = new $controller($app->request, $app->response);
 
-                // Get the callback method
-                $method = $ref->getMethod($method);
-
-                // Get the arguments returned by the router
-                $args = func_get_args();
-
-                // Output the response from the controller
-                $output = $method->invokeArgs($controller, $args);
+                $output = $app->respond($callback->invokeArgs($controller, $data));
+            } else {
+                $output = $app->respond($callback->invokeArgs($data));
             }
 
             ob_start();
@@ -124,6 +127,91 @@ class PageCompiler extends Application
         });
 
         return $this->compile($compiledRoute, $compile, $vars);
+        // $app = $this;
+        //
+        // // We only really want to compile get requests
+        // if ($method !== Router::GET || !$compile) {
+        //     return;
+        // }
+        //
+        // $base_uri = $app->config->app->base_uri;
+        //
+        // if (is_array($route)) {
+        //     list($route, $name) = $route;
+        // }
+        //
+        // $route = $base_uri.$route;
+        //
+        // if (isset($name)) {
+        //     $route = [$route, $name];
+        // }
+        //
+        // // Compile the route as if we were on the front end, but use a different
+        // // callback which returns the output from the callback, rather than
+        // // echoing it to the output buffer
+        // $compiledRoute = Router::$method($route, function () use ($app, $callback) {
+        //     $output = null;
+        //
+        //     // If a closure is passed, execute it directly
+        //     if ($callback instanceof Closure) {
+        //         // Add the request and response objects to the arguments
+        //         $data = [
+        //             $app->request,
+        //             $app->response,
+        //         ];
+        //         $args = array_merge($data, func_get_args());
+        //
+        //         // Output the results of the callback
+        //         $output = call_user_func_array($callback, $args);
+        //     }
+        //
+        //     if (is_string($callback)) {
+        //         // Get the controller and method name
+        //         list($class, $method) = explode('@', $callback);
+        //
+        //         // If the naked class doesn't exist, prepend it with the namespace
+        //         if (!class_exists($class, false)) {
+        //             $class = APP_NAMESPACE.'Controllers\\'.$class;
+        //         }
+        //
+        //         // If the class still doesn't exist, throw an exception
+        //         if (!class_exists($class)) {
+        //             throw new InvalidControllerException('The controller '.$class.' does not exist.');
+        //         }
+        //
+        //         // Create a reflection class for the controller
+        //         $ref = new ReflectionClass($class);
+        //
+        //         // If the controller does not have the requested method,
+        //         // throw an exception
+        //         if (!$ref->hasMethod($method)) {
+        //             throw new InvalidControllerMethodException('The method '.$class.'::'.$method.' does not exist.');
+        //         }
+        //
+        //         // Initialise the controller object
+        //         $controller = new $class($app->request, $app->response);
+        //
+        //         // Get the callback method
+        //         $method = $ref->getMethod($method);
+        //
+        //         // Get the arguments returned by the router
+        //         $args = func_get_args();
+        //
+        //         // Output the response from the controller
+        //         $output = $method->invokeArgs($controller, $args);
+        //     }
+        //
+        //     ob_start();
+        //     echo $output;
+        //
+        //     while (ob_get_level() > 1) {
+        //         echo ob_get_clean();
+        //     }
+        //
+        //     return ob_get_clean();
+        // });
+        //
+        // return $this->compile($compiledRoute, $compile, $vars);
     }
 
     /**
