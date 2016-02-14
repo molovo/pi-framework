@@ -26,7 +26,7 @@
     "richthegeek/phpsass": "^1.0",
     "erusev/parsedown": "^1.6",
     "mustache/mustache": "~2.5",
-    "mustangostang/spyc": "~1.0"
+    "mustangostang/spyc": "~0.5"
   },
   "minimum-stability": "dev"
 }
