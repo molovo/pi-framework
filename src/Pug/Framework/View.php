@@ -210,6 +210,32 @@ class View
     }
 
     /**
+     * Retrieve the value of an option.
+     *
+     * @param string $key The option to get
+     *
+     * @return mixed
+     */
+    public function getOption($key)
+    {
+        if (isset($this->options[$key])) {
+            return $this->options[$key];
+        }
+
+        return;
+    }
+
+    /**
+     * Get all the view's options.
+     *
+     * @return array
+     */
+    public function getOptions()
+    {
+        return $this->options;
+    }
+
+    /**
      * Set a rendering option.
      *
      * @param string $key   The option key to set
@@ -242,6 +268,32 @@ class View
         }
 
         return $this;
+    }
+
+    /**
+     * Retrieve the value of a variable.
+     *
+     * @param string $key The var to get
+     *
+     * @return mixed
+     */
+    public function getVar($key)
+    {
+        if (isset($this->vars[$key])) {
+            return $this->vars[$key];
+        }
+
+        return;
+    }
+
+    /**
+     * Get all the view's variables.
+     *
+     * @return array
+     */
+    public function getVars()
+    {
+        return $this->vars;
     }
 
     /**
@@ -347,6 +399,8 @@ class View
                 $this->content = $this->renderPhp($vars);
                 break;
         }
+
+        $vars = array_merge($this->vars, $vars);
 
         if ($this->options['layout'] !== null) {
             $vars['content'] = $this->content;
@@ -494,8 +548,6 @@ class View
      */
     public function renderMarkdown(array $vars = [])
     {
-        $vars = array_merge($this->vars, $vars);
-
         // Set up the Parsedown parses
         if (static::$markdownParser === null) {
             static::$markdownParser = new Parsedown;
@@ -503,6 +555,7 @@ class View
 
         // Pass the raw markdown through the mustache parser
         $markdown = $this->renderMustache($vars);
+        $vars     = array_merge($this->vars, $vars);
 
         // Render and store the HTML
         $parser = static::$markdownParser;
