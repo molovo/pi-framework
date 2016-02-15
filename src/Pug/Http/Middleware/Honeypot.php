@@ -3,6 +3,7 @@
 namespace Pug\Http\Middleware;
 
 use Pug\Framework\Application;
+use Pug\Http\Exceptions\SuspectedBotException;
 use Pug\Http\Interfaces\Middleware as MiddlewareInterface;
 use Pug\Http\Request;
 
@@ -24,6 +25,23 @@ class Honeypot implements MiddlewareInterface
     const MIN_POST_TIME = 1;
 
     /**
+     * Gets the hexadecimal representation of a key.
+     *
+     * @param string $key The key to convert
+     *
+     * @return string The converted key
+     */
+    private static function encode($key)
+    {
+        $hex = '';
+        for ($i = 0; $i < strlen($key); $i++) {
+            $hex .= dechex(ord($key[$i]));
+        }
+
+        return $hex;
+    }
+
+    /**
      * Check that the honeypot field has not been filled in, and that the form
      * was not filled in quicker than possible by a human.
      *
@@ -36,13 +54,13 @@ class Honeypot implements MiddlewareInterface
         $request = Application::instance()->request;
 
         // If the honeypot is filled in, throw an exception
-        $honey = $request->input->{crc32(self::POST_KEY)};
+        $honey = $request->input->{static::encode(self::POST_KEY)};
         if ($honey) {
             throw new SuspectedBotException;
         }
 
-        $time = $request->input->{crc32(self::POST_TIME_KEY)};
-        if (time() < base64_decode($time) + self::MIN_POST_TIME) {
+        $time = $request->input->{static::encode(self::POST_TIME_KEY)};
+        if (time() < (base64_decode($time) + self::MIN_POST_TIME)) {
             throw new SuspectedBotException;
         }
 
@@ -57,10 +75,10 @@ class Honeypot implements MiddlewareInterface
     public static function input()
     {
         return '<input type="hidden"
-                       name="'.crc32(self::POST_KEY).'"
+                       name="'.static::encode(self::POST_KEY).'"
                        value="">
                 <input type="hidden"
-                       name="'.crc32(self::POST_TIME_KEY).'"
+                       name="'.static::encode(self::POST_TIME_KEY).'"
                        value="'.base64_encode(time()).'">';
     }
 }
