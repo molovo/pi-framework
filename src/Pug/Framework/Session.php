@@ -20,9 +20,22 @@ class Session
      */
     public static function bootstrap(Config $config)
     {
+        // Create and set the session save handler
         static::$handler = new Handler($config);
         session_set_save_handler(static::$handler, true);
+
+        // Set the cookie parameters
+        $app     = Application::instance();
+        $path    = $app->config->base_uri ?: '/';
+        $domain  = $app->config->domain ?: $_SERVER['HTTP_HOST'];
+        $secure  = ($_SERVER['REQUEST_SCHEME'] === 'https');
+        $expires = time() + ($config->expiry ?: 2592000);
+        session_set_cookie_params($expires, $path, $domain, $secure, true);
+
+        // Start the session
         session_start();
+
+        // Register session_write_close() as a shutdown function
         session_register_shutdown();
     }
 
