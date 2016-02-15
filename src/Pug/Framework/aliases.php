@@ -9,6 +9,7 @@ $aliases = [
     'Crypt'      => Pug\Crypt\Encrypter::class,
     'Csrf'       => Pug\Http\Middleware\Csrf::class,
     'Database'   => Molovo\Interrogate\Database::class,
+    'Env'        => Pug\Framework\Environment::class,
     'Honeypot'   => Pug\Http\Middleware\Honeypot::class,
     'Input'      => Pug\Http\Request\Input::class,
     'Middleware' => Pug\Http\Interfaces\Middleware::class,

@@ -48,6 +48,13 @@ class Application
     public $config = null;
 
     /**
+     * Environments which this application matches.
+     *
+     * @var string[]
+     */
+    public $environments = [];
+
+    /**
      * Retrieve the current application instance.
      *
      * @return self
@@ -163,13 +170,43 @@ class Application
      */
     private function loadConfig()
     {
-        $config = [];
+        $base = APP_ROOT.'config/';
+        if (!file_exists($base.'app.php')) {
+            throw new ConfigNotFoundException('The application config file '.$base.'app.php could not be found');
+        }
+
+        $config = include $base.'app.php';
+
+        // Populate the environments array
+        $hostname     = gethostname();
+        $environments = include $base.'env.php';
+        foreach ($environments as $env => $hosts) {
+            foreach ($hosts as $host) {
+                if (fnmatch($host, $hostname)) {
+                    $this->environments[] = $env;
+
+                    // Merge the app config for the environment
+                    if (file_exists($base.$env.'/app.php')) {
+                        $envConfig = include $base.$env.'/app.php';
+                        $config    = array_merge($config, $envConfig);
+                    }
+                }
+            }
+        }
 
         // Loop through each of the config files and add them
         // to the main config array
-        foreach (glob(APP_ROOT.'config'.DS.'*.php') as $file) {
+        foreach (glob(APP_ROOT.'config/*.php') as $file) {
             $key          = str_replace('.php', '', basename($file));
             $config[$key] = include $file;
+
+            // Loop through each of the environments and merge their config
+            foreach ($this->environments as $env) {
+                if (file_exists($base.$env.'/'.$key.'.php')) {
+                    $envConfig    = include $base.$env.'/'.$key.'.php';
+                    $config[$key] = array_merge($config[$key], $envConfig);
+                }
+            }
         }
 
         // Create and store the config object
