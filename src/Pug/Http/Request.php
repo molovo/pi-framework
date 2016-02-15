@@ -3,6 +3,7 @@
 namespace Pug\Http;
 
 use Molovo\Traffic\Router;
+use Pug\Framework\Session;
 use Pug\Http\Request\Input;
 
 class Request
@@ -36,6 +37,13 @@ class Request
     public $uri = null;
 
     /**
+     * The previous URI.
+     *
+     * @var string|null
+     */
+    public $previousUri = null;
+
+    /**
      * Create a new request for the application.
      */
     public function __construct()
@@ -43,15 +51,28 @@ class Request
         $this->router = new Router;
         $this->method = strtoupper($this->router->requestMethod());
 
+        // Store the raw input data
         $input          = array_merge($_GET, $_POST);
         $this->rawInput = new Input($input);
 
+        // Escape the input data, and store it again
         $input       = $this->escapeInput($input);
         $this->input = new Input($input);
 
+        // Store the current URI
         if (isset($_SERVER['REQUEST_URI'])) {
             $this->uri = $_SERVER['REQUEST_URI'];
         }
+
+        // Retrieve the previous URI from the session, and store it
+        // against the request object
+        if (($previous = Session::get('previous_uri')) !== null) {
+            $this->previousUri = $previous;
+        }
+
+        // Update the previous URI session key now that we have retrieved
+        // it's value
+        Session::set('previous_uri', $this->uri);
     }
 
     /**
@@ -63,7 +84,7 @@ class Request
      */
     private function escapeInput(array $input = [])
     {
-        foreach ($input as $key => &$value) {
+        foreach ($input as &$value) {
             if (is_array($value)) {
                 $value = $this->escapeInput($value);
                 continue;
