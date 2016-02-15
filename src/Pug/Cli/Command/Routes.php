@@ -18,11 +18,13 @@ class Routes implements CommandInterface
         if (!method_exists(self::class, $scope) && $scope !== 'help') {
             Prompt::outputend(ANSI::fg('The scope "'.$scope.'" could not be found.'."\n", ANSI::RED));
 
-            return Help::execute($app);
+            Help::execute($app);
+            exit(127);
         }
 
         if ($scope === self::HELP) {
-            return Help::execute($app);
+            Help::execute($app);
+            exit;
         }
 
         return $command->executeScope();

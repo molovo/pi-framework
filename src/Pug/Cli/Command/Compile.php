@@ -30,11 +30,13 @@ class Compile implements Command
         if (!in_array($scope, ['all', 'assets', 'css', 'coffee', 'js', 'sass', 'help'])) {
             Prompt::outputend(ANSI::fg('The scope "'.$scope.'" could not be found.'."\n", ANSI::RED));
 
-            return Help::execute($app);
+            Help::execute($app);
+            exit(127);
         }
 
         if ($scope === self::HELP) {
-            return Help::execute($app);
+            Help::execute($app);
+            exit;
         }
 
         $scopes = [];

@@ -135,6 +135,7 @@ class Application
             Prompt::outputend(ANSI::fg('The command "'.$command.'" could not be found.'."\n", ANSI::RED));
             $this->command = 'help';
             Help::execute($this);
+            exit(127);
         }
 
         $class::execute($this);

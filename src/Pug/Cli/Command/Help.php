@@ -57,6 +57,5 @@ class Help implements Command
         }
         $help = include $this->template;
         echo $help;
-        exit;
     }
 }
