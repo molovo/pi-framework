@@ -62,10 +62,8 @@ class Csrf implements MiddlewareInterface
 
         $token = Str::random(32);
 
-        // Register a shutdown function to store the new token
-        register_shutdown_function(function () use ($token) {
-            Session::set(self::SESSION_KEY, $token);
-        });
+        // Store the new token
+        Session::set(self::SESSION_KEY, $token);
 
         return static::$token = $token;
     }
