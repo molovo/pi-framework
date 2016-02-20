@@ -5,10 +5,14 @@ namespace Pug\Framework\Session;
 use Molovo\Amnesia\Cache\Instance as CacheInstance;
 use Molovo\Amnesia\Config as CacheConfig;
 use Pug\Crypt\Encrypter;
+use Pug\Crypt\Hash;
 use Pug\Framework\Config;
+use Pug\Framework\Exceptions\Session\InvalidSessionIdException;
+use Pug\Http\Cookie;
 
 class Handler implements \SessionHandlerInterface
 {
+    const DEFAULT_ID_FORMAT = 'XX00-XX00-00XX-00XX-XX00-XX00-XXXX-97XX-XX00-Y0Y0';
     /**
      * The cache instance in which session data will be stored.
      *
@@ -17,17 +21,30 @@ class Handler implements \SessionHandlerInterface
     private $storage = null;
 
     /**
+     * The session config.
+     *
+     * @var Config
+     */
+    private $config = null;
+
+    /**
      * Create the session handler.
      *
      * @param Config $config The session config
      */
     public function __construct(Config $config)
     {
+        $this->config = $config;
+
         // Convert the config object into one the cache understands
-        $config = new CacheConfig($config->toArray());
+        $cacheConfig = new CacheConfig($config->toArray());
 
         // Create the cache instance for use in reading/writing session data
-        $this->storage = new CacheInstance('pug_session_storage', $config);
+        $this->storage = new CacheInstance('pug_session_storage', $cacheConfig);
+
+        if (Cookie::get($config->cookie_name) === null) {
+            $this->generateId();
+        }
     }
 
     /**
@@ -60,6 +77,8 @@ class Handler implements \SessionHandlerInterface
      */
     public function read($id)
     {
+        $this->checkId($id);
+
         if (($payload = $this->storage->get('session.'.$id, false)) !== null) {
             return Encrypter::decrypt($payload);
         };
@@ -77,8 +96,10 @@ class Handler implements \SessionHandlerInterface
      */
     public function write($id, $data)
     {
+        $this->checkId($id);
+
         if (!empty($data)) {
-            $this->storage->set('session.'.$id, Encrypter::encrypt($data));
+            $this->storage->set('session.'.$id, Encrypter::encrypt($data), $this->config->lifetime);
         }
 
         return true;
@@ -93,6 +114,8 @@ class Handler implements \SessionHandlerInterface
      */
     public function destroy($id)
     {
+        $this->checkId($id);
+
         $this->storage->clear('session.'.$id);
 
         return true;
@@ -108,5 +131,22 @@ class Handler implements \SessionHandlerInterface
     public function gc($maxlifetime)
     {
         return true;
+    }
+
+    private function checkId($id)
+    {
+        if (Cookie::get($this->config->cookie_name) === null) {
+            return true;
+        }
+
+        $format = $this->config->id_pattern ?: self::DEFAULT_ID_FORMAT;
+        if (!Hash::match($format, $id)) {
+            throw new InvalidSessionIdException('Session ID is invalid. Possible hijack attempt.');
+        }
+    }
+
+    private function generateId()
+    {
+        return session_id(Hash::generate($this->config->id_format ?: self::DEFAULT_ID_FORMAT));
     }
 }

@@ -20,7 +20,7 @@ class Cookie
         $app     = Application::instance();
         $path    = $app->config->app->base_uri ?: '/';
         $domain  = $app->config->app->domain ?: $_SERVER['HTTP_HOST'];
-        $secure  = ($_SERVER['REQUEST_SCHEME'] === 'https');
+        $secure  = $app->request->isSecure();
         $expires = time() + $expiry;
         setcookie($key, $value, $expires, $path, $domain, $secure, true);
     }

@@ -90,14 +90,14 @@ class Application
         // Register the error handler
         $this->registerErrorHandler();
 
+        // Create our request and response objects
+        $this->request  = new Request;
+        $this->response = new Response;
+
         // Bootstrap the database, cache and session
         Database::bootstrap($this->config->db->toArray());
         Cache::bootstrap($this->config->cache->toArray());
         Session::bootstrap($this->config->session);
-
-        // Create our request and response objects
-        $this->request  = new Request;
-        $this->response = new Response;
 
         // Include the app routes
         require APP_ROOT.'routes.php';

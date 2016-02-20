@@ -96,6 +96,31 @@ class Request
         return $input;
     }
 
+    /**
+     * Tries a few common methods to detmerine if we are on an SSL connection.
+     *
+     * @return bool
+     */
+    public function isSecure()
+    {
+        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
+            return true;
+        }
+
+        if (isset($_SERVER['REQUEST_SCHEME']) && $_SERVER['REQUEST_SCHEME'] == 'https') {
+            return true;
+        }
+
+        if ((!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])
+            && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
+            || (!empty($_SERVER['HTTP_X_FORWARDED_SSL'])
+            && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on')) {
+            return true;
+        }
+
+        return false;
+    }
+
     public function isPost()
     {
         return in_array($this->method, ['POST', 'PUT', 'PATCH', 'DELETE']);
