@@ -7,12 +7,15 @@ use Molovo\Amnesia\Config as CacheConfig;
 use Pug\Crypt\Encrypter;
 use Pug\Crypt\Hash;
 use Pug\Framework\Config;
-use Pug\Framework\Exceptions\Session\InvalidSessionIdException;
 use Pug\Http\Cookie;
 
 class Handler implements \SessionHandlerInterface
 {
+    /**
+     * A default session ID format - should be overridden.
+     */
     const DEFAULT_ID_FORMAT = 'XX00-XX00-00XX-00XX-XX00-XX00-XXXX-97XX-XX00-Y0Y0';
+
     /**
      * The cache instance in which session data will be stored.
      *
@@ -133,6 +136,13 @@ class Handler implements \SessionHandlerInterface
         return true;
     }
 
+    /**
+     * Check that the session ID conforms to the defined ID format.
+     *
+     * @param string $id The ID to check
+     *
+     * @return bool
+     */
     private function checkId($id)
     {
         if (Cookie::get($this->config->cookie_name) === null) {
@@ -141,10 +151,20 @@ class Handler implements \SessionHandlerInterface
 
         $format = $this->config->id_pattern ?: self::DEFAULT_ID_FORMAT;
         if (!Hash::match($format, $id)) {
-            throw new InvalidSessionIdException('Session ID is invalid. Possible hijack attempt.');
+            // The session ID does not match the provided pattern, so it's
+            // possible that this is a hijack attempt. To avoid this, we create
+            // a new session ID.
+            session_regenerate_id(Hash::generate($format));
         }
+
+        return true;
     }
 
+    /**
+     * Generate a new session ID.
+     *
+     * @return bool
+     */
     private function generateId()
     {
         return session_id(Hash::generate($this->config->id_format ?: self::DEFAULT_ID_FORMAT));
