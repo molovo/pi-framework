@@ -72,7 +72,7 @@ class Hash
             $char = $pattern[$i];
 
             // Replace zeroes with random numbers
-            if ($char === 0) {
+            if ($char === '0') {
                 $serial .= rand(0, 9);
                 continue;
             }
