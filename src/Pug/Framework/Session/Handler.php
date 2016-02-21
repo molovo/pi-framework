@@ -149,12 +149,12 @@ class Handler implements \SessionHandlerInterface
             return true;
         }
 
-        $format = $this->config->id_pattern ?: self::DEFAULT_ID_FORMAT;
-        if (!Hash::match($format, $id)) {
+        if (!Hash::match($this->config->id_pattern, $id)) {
             // The session ID does not match the provided pattern, so it's
             // possible that this is a hijack attempt. To avoid this, we create
-            // a new session ID.
-            session_regenerate_id(Hash::generate($format));
+            // a new session ID, and remove the old one from the cookie.
+            Cookie::set($this->config->cookie_name, null);
+            session_regenerate_id(Hash::generate($this->config->id_pattern));
         }
 
         return true;

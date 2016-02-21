@@ -26,6 +26,10 @@ class Session
             $config->cookie_name = 'session_id';
         }
 
+        if (!$config->id_format) {
+            $config->id_format = Handler::DEFAULT_ID_FORMAT;
+        }
+
         // Create and set the session save handler
         static::$handler = new Handler($config);
         session_set_save_handler(static::$handler, true);
