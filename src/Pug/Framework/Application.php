@@ -9,6 +9,7 @@ use Molovo\Traffic\Route;
 use Molovo\Traffic\Router;
 use Pug\Compiler\Compiler;
 use Pug\Http\Exceptions\InvalidControllerException;
+use Pug\Framework\Exceptions\ConfigNotFoundException;
 use Pug\Http\Exceptions\InvalidControllerMethodException;
 use Pug\Http\Request;
 use Pug\Http\Response;
@@ -189,7 +190,7 @@ class Application
     private function loadConfig()
     {
         $base     = APP_ROOT.'config/';
-        $filename = $base.'app.yaml';
+        $filename = $base.'app.yml';
         if (!file_exists($filename)) {
             throw new ConfigNotFoundException('The application config file '.$filename.' could not be found');
         }
@@ -198,14 +199,14 @@ class Application
 
         // Populate the environments array
         $hostname     = gethostname();
-        $environments = Yaml::parseFile($base.'env.yaml');
+        $environments = Yaml::parseFile($base.'env.yml');
         foreach ($environments as $env => $hosts) {
             foreach ($hosts as $host) {
                 if (fnmatch($host, $hostname)) {
                     $this->environments[] = $env;
 
                     // Merge the app config for the environment
-                    $filename = $base.$env.'/app.yaml';
+                    $filename = $base.$env.'/app.yml';
                     if (file_exists($filename)) {
                         $envConfig = Yaml::parseFile($filename);
                         $config    = array_merge($config, $envConfig);
@@ -216,13 +217,13 @@ class Application
 
         // Loop through each of the config files and add them
         // to the main config array
-        foreach (glob(APP_ROOT.'config/*.yaml') as $file) {
-            $key          = str_replace('.yaml', '', basename($file));
+        foreach (glob(APP_ROOT.'config/*.yml') as $file) {
+            $key          = str_replace('.yml', '', basename($file));
             $config[$key] = Yaml::parseFile($file);
 
             // Loop through each of the environments and merge their config
             foreach ($this->environments as $env) {
-                $filename = $base.$env.'/'.$key.'.yaml';
+                $filename = $base.$env.'/'.$key.'.yml';
                 if (file_exists($filename)) {
                     $envConfig    = Yaml::parseFile($filename);
                     $config[$key] = array_merge($config[$key], $envConfig);
