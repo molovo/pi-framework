@@ -469,16 +469,7 @@ class View
 
         list(, $yaml, $content) = $parts;
 
-        $options = null;
-        if (function_exists('yaml_parse')) {
-            $options = yaml_parse($yaml);
-        } else {
-            $options = spyc_load($yaml);
-        }
-
-        if ($options === null) {
-            throw new YamlParseException('There was an error parsing your YAML front matter');
-        }
+        $options = Yaml::parse($yaml);
 
         foreach ($options as $key => $value) {
             if (array_key_exists($key, static::$defaultOptions)) {

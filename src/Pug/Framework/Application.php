@@ -94,9 +94,27 @@ class Application
         $this->request  = new Request;
         $this->response = new Response;
 
-        // Bootstrap the database, cache and session
+        // Bootstrap the database
         Database::bootstrap($this->config->db->toArray());
+
+        // Convert relative store paths to absolute, and bootstrap the cache
+        foreach ($this->config->cache as $instance => $config) {
+            $cacheStorePath = $config->store_path;
+            if ($cacheStorePath !== null) {
+                if (!is_dir($cacheStorePath) && is_dir(APP_ROOT.$cacheStorePath)) {
+                    $this->config->cache->{$instance}->store_path = APP_ROOT.$cacheStorePath;
+                }
+            }
+        }
         Cache::bootstrap($this->config->cache->toArray());
+
+        // Convert relative store paths to absolute, and bootstrap the session
+        $sessionStorePath = $this->config->session->store_path;
+        if ($sessionStorePath !== null) {
+            if (!is_dir($sessionStorePath) && is_dir(APP_ROOT.$sessionStorePath)) {
+                $this->config->session->store_path = APP_ROOT.$sessionStorePath;
+            }
+        }
         Session::bootstrap($this->config->session);
 
         // Include the app routes
@@ -170,24 +188,26 @@ class Application
      */
     private function loadConfig()
     {
-        $base = APP_ROOT.'config/';
-        if (!file_exists($base.'app.php')) {
-            throw new ConfigNotFoundException('The application config file '.$base.'app.php could not be found');
+        $base     = APP_ROOT.'config/';
+        $filename = $base.'app.yaml';
+        if (!file_exists($filename)) {
+            throw new ConfigNotFoundException('The application config file '.$filename.' could not be found');
         }
 
-        $config = include $base.'app.php';
+        $config = Yaml::parseFile($filename);
 
         // Populate the environments array
         $hostname     = gethostname();
-        $environments = include $base.'env.php';
+        $environments = Yaml::parseFile($base.'env.yaml');
         foreach ($environments as $env => $hosts) {
             foreach ($hosts as $host) {
                 if (fnmatch($host, $hostname)) {
                     $this->environments[] = $env;
 
                     // Merge the app config for the environment
-                    if (file_exists($base.$env.'/app.php')) {
-                        $envConfig = include $base.$env.'/app.php';
+                    $filename = $base.$env.'/app.yaml';
+                    if (file_exists($filename)) {
+                        $envConfig = Yaml::parseFile($filename);
                         $config    = array_merge($config, $envConfig);
                     }
                 }
@@ -196,14 +216,15 @@ class Application
 
         // Loop through each of the config files and add them
         // to the main config array
-        foreach (glob(APP_ROOT.'config/*.php') as $file) {
-            $key          = str_replace('.php', '', basename($file));
-            $config[$key] = include $file;
+        foreach (glob(APP_ROOT.'config/*.yaml') as $file) {
+            $key          = str_replace('.yaml', '', basename($file));
+            $config[$key] = Yaml::parseFile($file);
 
             // Loop through each of the environments and merge their config
             foreach ($this->environments as $env) {
-                if (file_exists($base.$env.'/'.$key.'.php')) {
-                    $envConfig    = include $base.$env.'/'.$key.'.php';
+                $filename = $base.$env.'/'.$key.'.yaml';
+                if (file_exists($filename)) {
+                    $envConfig    = Yaml::parseFile($filename);
                     $config[$key] = array_merge($config[$key], $envConfig);
                 }
             }

@@ -6,6 +6,7 @@ use Molovo\Str\Str;
 use Pug\Cli\Command\Help;
 use Pug\Cli\Prompt\ANSI;
 use Pug\Framework\Config;
+use Pug\Framework\Yaml;
 use Whoops;
 use Whoops\Handler\PlainTextHandler;
 
@@ -113,9 +114,9 @@ class Application
 
         // Loop through each of the config files and add them
         // to the main config array
-        foreach (glob(APP_ROOT.'config'.DS.'*.php') as $file) {
-            $key          = str_replace('.php', '', basename($file));
-            $config[$key] = include $file;
+        foreach (glob(APP_ROOT.'config'.DS.'*.yaml') as $file) {
+            $key          = str_replace('.yaml', '', basename($file));
+            $config[$key] = Yaml::parseFile($file);
         }
 
         // Create and store the config object

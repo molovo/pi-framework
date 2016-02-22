@@ -55,6 +55,8 @@ class Session
     /**
      * Get a value from the session.
      *
+     * TODO: Replace $_SESSION superglobal with Molovo\Object\Object instance
+     *
      * @param string $key The session key
      *
      * @return mixed The value
@@ -70,6 +72,8 @@ class Session
 
     /**
      * Store a value in the session.
+     *
+     * TODO: Replace $_SESSION superglobal with Molovo\Object\Object instance
      *
      * @param string $key   The session key
      * @param mixed  $value The value to set
