@@ -5,7 +5,7 @@ namespace Pug\Framework\Session;
 use Molovo\Amnesia\Cache\Instance as CacheInstance;
 use Molovo\Amnesia\Config as CacheConfig;
 use Pug\Crypt\Encrypter;
-use Pug\Crypt\Hash;
+use Pug\Crypt\Serial;
 use Pug\Framework\Config;
 use Pug\Http\Cookie;
 
@@ -149,12 +149,12 @@ class Handler implements \SessionHandlerInterface
             return true;
         }
 
-        if (!Hash::match($this->config->id_pattern, $id)) {
+        if (!Serial::match($this->config->id_pattern, $id)) {
             // The session ID does not match the provided pattern, so it's
             // possible that this is a hijack attempt. To avoid this, we create
             // a new session ID, and remove the old one from the cookie.
             Cookie::set($this->config->cookie_name, null);
-            session_regenerate_id(Hash::generate($this->config->id_pattern));
+            session_regenerate_id(Serial::generate($this->config->id_pattern));
         }
 
         return true;
@@ -167,6 +167,6 @@ class Handler implements \SessionHandlerInterface
      */
     private function generateId()
     {
-        return session_id(Hash::generate($this->config->id_format ?: self::DEFAULT_ID_FORMAT));
+        return session_id(Serial::generate($this->config->id_format ?: self::DEFAULT_ID_FORMAT));
     }
 }

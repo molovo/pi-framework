@@ -2,13 +2,13 @@
 
 namespace Pug\Crypt;
 
-class Hash
+class Serial
 {
     /**
-     * Compare a string to a provided pattern.
+     * Compare a serial to a provided pattern.
      *
      * @param string $pattern The pattern to compare to
-     * @param string $str     The string to check
+     * @param string $str     The serial to check
      *
      * @return bool
      */
@@ -39,6 +39,12 @@ class Hash
 
             // Xs match letters
             if ($char === 'X') {
+                $exp .= '[A-Z]{1}';
+                continue;
+            }
+
+            // Xs match letters
+            if ($char === 'y') {
                 $exp .= '[a-z]{1}';
                 continue;
             }
@@ -48,15 +54,15 @@ class Hash
         }
 
         // Match the string against our regular expression
-        return preg_match('#'.$exp.'#i', $str) !== 0;
+        return preg_match('#'.$exp.'#', $str) !== 0;
     }
 
     /**
-     * Create a hash which matches a provided pattern.
+     * Create a serial which matches a provided pattern.
      *
      * @param string $pattern The pattern to match
      *
-     * @return string The hash
+     * @return string The serial
      */
     public static function generate($pattern)
     {
@@ -83,9 +89,15 @@ class Hash
                 continue;
             }
 
-            // Replace Xs with random letters
+            // Replace Xs with random uppercase letters
             if ($char === 'X') {
                 $serial .= chr(rand(65, 90));
+                continue;
+            }
+
+            // Replace Ys with random lowercase letters
+            if ($char === 'y') {
+                $serial .= chr(rand(97, 122));
                 continue;
             }
 
@@ -94,5 +106,22 @@ class Hash
         }
 
         return $serial;
+    }
+
+    /**
+     * Create a unique pattern for a serial.
+     *
+     * @return string The pattern
+     */
+    public static function createPattern($len = 64)
+    {
+        $opts = ['0', 'X', 'y'];
+        $str  = '';
+
+        for ($i = 0; $i < $len; $i++) {
+            $str .= $opts[mt_rand(0, 2)];
+        }
+
+        return $str;
     }
 }
