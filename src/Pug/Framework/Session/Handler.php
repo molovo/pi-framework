@@ -58,7 +58,7 @@ class Handler implements \SessionHandlerInterface
      */
     public function open($savePath, $sessionName)
     {
-        return ($this->storage instanceof CacheInstance);
+        return $this->storage instanceof CacheInstance;
     }
 
     /**
