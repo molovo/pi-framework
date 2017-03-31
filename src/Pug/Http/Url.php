@@ -41,12 +41,14 @@ class Url
      */
     public static function full($uri, $domain = null, $https = false)
     {
+        $app = Application::instance();
+
         if (!$domain) {
             $domain = $app->config->app->domain;
         }
 
-        $protocol = $app->request->protocol;
-        if ($https) {
+        $protocol = 'http';
+        if ($https || $app->request->isSecure()) {
             $protocol = 'https';
         }
 

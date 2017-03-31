@@ -3,11 +3,19 @@
 namespace Pug\Http;
 
 use Molovo\Traffic\Router;
+use Pug\Framework\Application;
 use Pug\Framework\Session;
 use Pug\Http\Request\Input;
 
 class Request
 {
+    /**
+     * The application instance.
+     *
+     * @var Application
+     */
+    private $app;
+
     /**
      * Request vars.
      *
@@ -44,15 +52,27 @@ class Request
     public $previousUri = null;
 
     /**
-     * Create a new request for the application.
+     * The request headers.
+     *
+     * @var string[]
      */
-    public function __construct()
+    private $headers = [];
+
+    /**
+     * Create a new request for the application.
+     *
+     * @param Application $app
+     */
+    public function __construct(Application $app)
     {
-        $this->router = new Router;
+        $this->app    = $app;
+        $this->router = new Router();
         $this->method = strtoupper($this->router->requestMethod());
 
+        $this->parseHeaders();
+
         // Store the raw input data
-        $input          = array_merge($_GET, $_POST);
+        $input          = $this->getInput();
         $this->rawInput = new Input($input);
 
         // Escape the input data, and store it again
@@ -64,15 +84,31 @@ class Request
             $this->uri = $_SERVER['REQUEST_URI'];
         }
 
-        // Retrieve the previous URI from the session, and store it
-        // against the request object
-        if (($previous = Session::get('previous_uri')) !== null) {
-            $this->previousUri = $previous;
+        if (Session::isStarted()) {
+            // Retrieve the previous URI from the session, and store it
+            // against the request object
+            if (($previous = Session::get('previous_uri')) !== null) {
+                $this->previousUri = $previous;
+            }
+
+            // Update the previous URI session key now that we have retrieved
+            // it's value
+            Session::set('previous_uri', $this->uri);
+        }
+    }
+
+    /**
+     * Get input data from the request.
+     *
+     * @return array
+     */
+    private function getInput()
+    {
+        if ($this->contentType('application/json')) {
+            return json_decode(file_get_contents('php://input'), true);
         }
 
-        // Update the previous URI session key now that we have retrieved
-        // it's value
-        Session::set('previous_uri', $this->uri);
+        return array_merge($_GET, $_POST);
     }
 
     /**
@@ -94,6 +130,48 @@ class Request
         }
 
         return $input;
+    }
+
+    private function parseHeaders()
+    {
+        $headers = [];
+
+        foreach ($_SERVER as $name => $value) {
+            if (substr($name, 0, 5) == 'HTTP_') {
+                $name           = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))));
+                $headers[$name] = $value;
+            } elseif ($name == 'CONTENT_TYPE') {
+                $headers['Content-Type'] = $value;
+            } elseif ($name == 'CONTENT_LENGTH') {
+                $headers['Content-Length'] = $value;
+            }
+        }
+
+        return $this->headers = $headers;
+    }
+
+    /**
+     * Check if the Accept header matches the passed type.
+     *
+     * @param string $type
+     *
+     * @return bool
+     */
+    public function accepts($type)
+    {
+        return isset($this->headers['Accept']) && $this->headers['Accept'] === $type;
+    }
+
+    /**
+     * Check if the Content-Type header matches the passed type.
+     *
+     * @param string $type
+     *
+     * @return bool
+     */
+    public function contentType($type)
+    {
+        return isset($this->headers['Content-Type']) && $this->headers['Content-Type'] === $type;
     }
 
     /**

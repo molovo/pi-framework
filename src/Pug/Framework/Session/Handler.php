@@ -51,8 +51,8 @@ class Handler implements \SessionHandlerInterface
     }
 
     /**
-     * @param string $savePath    The session save path (Not used).
-     * @param string $sessionName The session name (Not used).
+     * @param string $savePath    the session save path (Not used)
+     * @param string $sessionName the session name (Not used)
      *
      * @return bool Check that the cache instance has been created successfully
      */
@@ -84,9 +84,7 @@ class Handler implements \SessionHandlerInterface
 
         if (($payload = $this->storage->get('session.'.$id, false)) !== null) {
             return Encrypter::decrypt($payload);
-        };
-
-        return;
+        }
     }
 
     /**
@@ -117,8 +115,6 @@ class Handler implements \SessionHandlerInterface
      */
     public function destroy($id)
     {
-        $this->checkId($id);
-
         $this->storage->clear('session.'.$id);
 
         return true;
@@ -154,7 +150,7 @@ class Handler implements \SessionHandlerInterface
             // possible that this is a hijack attempt. To avoid this, we create
             // a new session ID, and remove the old one from the cookie.
             Cookie::set($this->config->cookie_name, null);
-            session_regenerate_id(Serial::generate($this->config->id_pattern));
+            $this->generateId();
         }
 
         return true;
@@ -167,6 +163,6 @@ class Handler implements \SessionHandlerInterface
      */
     private function generateId()
     {
-        return session_id(Serial::generate($this->config->id_format ?: self::DEFAULT_ID_FORMAT));
+        return session_id(Serial::generate($this->config->id_pattern ?: self::DEFAULT_ID_FORMAT));
     }
 }

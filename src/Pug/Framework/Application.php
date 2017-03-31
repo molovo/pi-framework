@@ -8,8 +8,8 @@ use Molovo\Interrogate\Database;
 use Molovo\Traffic\Route;
 use Molovo\Traffic\Router;
 use Pug\Compiler\Compiler;
-use Pug\Http\Exceptions\InvalidControllerException;
 use Pug\Framework\Exceptions\ConfigNotFoundException;
+use Pug\Http\Exceptions\InvalidControllerException;
 use Pug\Http\Exceptions\InvalidControllerMethodException;
 use Pug\Http\Request;
 use Pug\Http\Response;
@@ -55,18 +55,18 @@ class Application
      */
     public $environments = [];
 
-    /**
-     * Retrieve the current application instance.
-     *
-     * @return self
-     */
+     /**
+      * Retrieve the current application instance.
+      *
+      * @return self
+      */
      public static function instance()
      {
          if (static::$instance !== null) {
              return static::$instance;
          }
 
-         return new static;
+         return new static();
      }
 
     /**
@@ -74,7 +74,7 @@ class Application
      */
     public static function bootstrap()
     {
-        return new static;
+        return new static();
     }
 
     /**
@@ -92,8 +92,8 @@ class Application
         $this->registerErrorHandler();
 
         // Create our request and response objects
-        $this->request  = new Request;
-        $this->response = new Response;
+        $this->request  = new Request($this);
+        $this->response = new Response($this);
 
         // Bootstrap the database
         Database::bootstrap($this->config->db->toArray());
@@ -116,7 +116,7 @@ class Application
                 $this->config->session->store_path = APP_ROOT.$sessionStorePath;
             }
         }
-        Session::bootstrap($this->config->session);
+        Session::bootstrap($this->config->session, $this);
 
         // Include the app routes
         require APP_ROOT.'routes.php';
@@ -241,8 +241,8 @@ class Application
     private function registerErrorHandler()
     {
         if ($this->config->app->dev_mode === true) {
-            $run     = new Whoops\Run;
-            $handler = new PrettyPageHandler;
+            $run     = new Whoops\Run();
+            $handler = new PrettyPageHandler();
 
             $run->pushHandler($handler);
 

@@ -2,12 +2,27 @@
 
 namespace Pug\Framework;
 
+use Molovo\Object\Object;
 use Pug\Framework\Session\Handler;
 use Pug\Http\Cookie;
 use Pug\Http\Request;
 
 class Session
 {
+    /**
+     * Whether the session has been started.
+     *
+     * @var bool
+     */
+    private static $isStarted = false;
+
+    /**
+     * The store which contains session data.
+     *
+     * @var object
+     */
+    private static $store;
+
     /**
      * The session handler.
      *
@@ -48,8 +63,60 @@ class Session
         // Start the session
         session_start();
 
+        static::$isStarted = true;
+
+        static::$store = $store = new Object($_SESSION);
+
         // Register session_write_close() as a shutdown function
+        $shutdown_handler = function () use ($store) {
+            $_SESSION = $store->toArray();
+        };
+        register_shutdown_function($shutdown_handler);
         session_register_shutdown();
+    }
+
+    /**
+     * Whether the session has been started.
+     *
+     * @return bool
+     */
+    public static function isStarted()
+    {
+        return static::$isStarted;
+    }
+
+    /**
+     * Retrieve the session storage object.
+     *
+     * @return object
+     */
+    private static function store()
+    {
+        if (!static::isStarted()) {
+            static::bootstrap();
+        }
+
+        return static::$store;
+    }
+
+    /**
+     * Save the session state.
+     */
+    private static function save()
+    {
+        $_SESSION = static::store()->toArray();
+    }
+
+    /**
+     * Check if a value exists in the session.
+     *
+     * @param string $key The session key
+     *
+     * @return bool
+     */
+    public static function has($key)
+    {
+        return static::store()->valueForPath($key) !== null;
     }
 
     /**
@@ -57,17 +124,18 @@ class Session
      *
      * TODO: Replace $_SESSION superglobal with Molovo\Object\Object instance
      *
-     * @param string $key The session key
+     * @param string     $key     The session key
+     * @param null|mixed $default
      *
      * @return mixed The value
      */
-    public static function get($key)
+    public static function get($key, $default = null)
     {
-        if (isset($_SESSION[$key])) {
-            return $_SESSION[$key];
+        if (!static::has($key)) {
+            return $default;
         }
 
-        return;
+        return static::store()->valueForPath($key);
     }
 
     /**
@@ -80,6 +148,7 @@ class Session
      */
     public static function set($key, $value)
     {
-        $_SESSION[$key] = $value;
+        static::store()->setValueForPath($key, $value);
+        static::save();
     }
 }
