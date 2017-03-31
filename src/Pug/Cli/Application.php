@@ -73,7 +73,7 @@ class Application
      */
     public static function bootstrap()
     {
-        static::$instance = new static;
+        static::$instance = new static();
         static::$instance->executeCommand();
     }
 
@@ -88,7 +88,7 @@ class Application
             return static::$instance;
         }
 
-        return new static;
+        return new static();
     }
 
     /**
@@ -96,8 +96,8 @@ class Application
      */
     private function registerErrorHandler()
     {
-        $run     = new Whoops\Run;
-        $handler = new PlainTextHandler;
+        $run     = new Whoops\Run();
+        $handler = new PlainTextHandler();
 
         $run->pushHandler($handler);
         $run->register();
@@ -114,8 +114,8 @@ class Application
 
         // Loop through each of the config files and add them
         // to the main config array
-        foreach (glob(APP_ROOT.'config'.DS.'*.yaml') as $file) {
-            $key          = str_replace('.yaml', '', basename($file));
+        foreach (glob(APP_ROOT.'config'.DS.'*.yml') as $file) {
+            $key          = str_replace('.yml', '', basename($file));
             $config[$key] = Yaml::parseFile($file);
         }
 

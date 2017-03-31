@@ -45,7 +45,7 @@ class Secure implements CommandInterface
      */
     public function generateSecret()
     {
-        $filename = APP_ROOT.'config/app.yaml';
+        $filename = APP_ROOT.'config/app.yml';
 
         // Get the contents of the config file
         $yaml = file_get_contents($filename);
@@ -72,7 +72,7 @@ class Secure implements CommandInterface
      */
     public function generateSessionSerial()
     {
-        $filename = APP_ROOT.'config/session.yaml';
+        $filename = APP_ROOT.'config/session.yml';
 
         // Get the contents of the config file
         $yaml = file_get_contents($filename);
@@ -82,7 +82,7 @@ class Secure implements CommandInterface
 
         // Replace the id_format value in the config file with the new pattern
         $regex   = '/^\s*id_format:\s*.*/m';
-        $replace = "id_format: $serial";
+        $replace = "id_pattern: $serial";
         $yaml    = preg_replace($regex, $replace, $yaml);
 
         // Store the new YAML content in the config file
