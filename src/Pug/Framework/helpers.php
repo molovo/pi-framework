@@ -33,3 +33,19 @@ if (!function_exists('e')) {
         return htmlentities($value, ENT_QUOTES, 'UTF-8', false);
     }
 }
+
+if (!function_exists('session')) {
+    /**
+     * Retrieve a value from the session.
+     *
+     * @param string $key     The session key
+     * @param mixed  $default A default value to fall back to if the key
+     *                        does not exist in the session
+     *
+     * @return mixed
+     */
+    function session($key, $default = null)
+    {
+        return Session::get($key, $default);
+    }
+}

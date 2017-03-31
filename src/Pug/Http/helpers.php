@@ -171,6 +171,12 @@ if (!function_exists('any')) {
 }
 
 if (!function_exists('resource')) {
+    /**
+     * Register a resource route to a controller.
+     *
+     * @param string $route      The route
+     * @param string $controller The controller class name
+     */
     function resource($route, $controller)
     {
         $application = Application::instance();
@@ -191,5 +197,35 @@ if (!function_exists('resource')) {
         get([$route.'/{id:int}/edit', $name.'.edit'], $controller.'@edit');
         delete([$route.'/{id:int}', $name.'.delete'], $controller.'@destroy');
         post([$route.'/{id:int}/destroy', $name.'.destroy'], $controller.'@destroy');
+    }
+}
+
+if (!function_exists('redirect')) {
+    /**
+     * Redirect to a URL or route.
+     *
+     * @param string $to A URL or route name
+     *
+     * @return Redirect
+     */
+    function redirect($to)
+    {
+        if (substr($to, 0, 1) === '/') {
+            return Redirect::to($to);
+        }
+
+        return Redirect::route($to);
+    }
+}
+
+if (!function_exists('input')) {
+    /**
+     * Retrieve input data from request.
+     *
+     * @return mixed
+     */
+    function input()
+    {
+        return call_user_func_array('Input::get', func_get_args());
     }
 }
