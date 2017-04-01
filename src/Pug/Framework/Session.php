@@ -10,6 +10,12 @@ use Pug\Http\Request;
 class Session
 {
     /**
+     * The session key which will be used to store the names
+     * of keys which have been flashed for a single request.
+     */
+    const FLASHED_SESSION_KEY = 'pug.session.flashed_keys';
+
+    /**
      * Whether the session has been started.
      *
      * @var bool
@@ -22,6 +28,13 @@ class Session
      * @var object
      */
     private static $store;
+
+    /**
+     * An array of flashed session keys.
+     *
+     * @var string[]
+     */
+    private static $flashed = [];
 
     /**
      * The session handler.
@@ -67,8 +80,13 @@ class Session
 
         static::$store = $store = new Object($_SESSION);
 
-        // Register session_write_close() as a shutdown function
+        // Register session shutdown handlers
         $shutdown_handler = function () use ($store) {
+            $flashed = $store->valueForPath(self::FLASHED_SESSION_KEY) ?: [];
+            foreach ($flashed as $key) {
+                $store->setValueForPath($key, null);
+            }
+            $store->setValueForPath(self::FLASHED_SESSION_KEY, static::$flashed);
             $_SESSION = $store->toArray();
         };
         register_shutdown_function($shutdown_handler);
@@ -110,7 +128,7 @@ class Session
     /**
      * Check if a value exists in the session.
      *
-     * @param string $key The session key
+     * @param string $key
      *
      * @return bool
      */
@@ -122,9 +140,7 @@ class Session
     /**
      * Get a value from the session.
      *
-     * TODO: Replace $_SESSION superglobal with Molovo\Object\Object instance
-     *
-     * @param string     $key     The session key
+     * @param string     $key
      * @param null|mixed $default
      *
      * @return mixed The value
@@ -141,8 +157,6 @@ class Session
     /**
      * Store a value in the session.
      *
-     * TODO: Replace $_SESSION superglobal with Molovo\Object\Object instance
-     *
      * @param string $key   The session key
      * @param mixed  $value The value to set
      */
@@ -150,5 +164,27 @@ class Session
     {
         static::store()->setValueForPath($key, $value);
         static::save();
+    }
+
+    /**
+     * Remove a value from the session.
+     *
+     * @param string $key [description]
+     */
+    public static function forget($key)
+    {
+        static::set($key, null);
+    }
+
+    /**
+     * Store a value in the session for a single request.
+     *
+     * @param string $key
+     * @param mixed  $value
+     */
+    public static function flash($key, $value)
+    {
+        static::set($key, $value);
+        static::$flashed[] = $key;
     }
 }
