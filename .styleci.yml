@@ -1,0 +1,28 @@
+preset: symfony
+
+risky: true
+
+enabled:
+  - align_equals
+  - align_double_arrow
+  - combine_consecutive_unsets
+  - dir_constant
+  - linebreak_after_opening_tag
+  - modernize_types_casting
+  - no_multiline_whitespace_before_semicolons
+  - no_short_echo_tag
+  - no_useless_else
+  - no_useless_return
+  - alpha_ordered_imports
+  - phpdoc_add_missing_param_annotation
+  - phpdoc_order
+  - short_array_syntax
+  - simplified_null_return
+
+disabled:
+  - unalign_equals
+  - unalign_double_arrow
+
+finder:
+  path:
+    - "src/"
