@@ -3,7 +3,6 @@
 namespace Pug\Framework;
 
 use Molovo\Object\Object;
-use Pug\Framework\Application;
 
 class Config extends Object
 {
@@ -11,6 +10,7 @@ class Config extends Object
      * Get a config value.
      *
      * @param string $path The path of the value to get
+     * @param mixed  $key
      *
      * @return mixed The value
      */
@@ -23,6 +23,7 @@ class Config extends Object
      * Set a config value.
      *
      * @param string $path The path of the value to set
+     * @param mixed  $key
      *
      * @return mixed The value
      */

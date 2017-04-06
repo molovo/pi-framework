@@ -5,7 +5,6 @@ namespace Pug\Http\Middleware;
 use Pug\Framework\Application;
 use Pug\Http\Exceptions\SuspectedBotException;
 use Pug\Http\Interfaces\Middleware as MiddlewareInterface;
-use Pug\Http\Request;
 
 class Honeypot implements MiddlewareInterface
 {
@@ -34,7 +33,7 @@ class Honeypot implements MiddlewareInterface
     private static function encode($key)
     {
         $hex = '';
-        for ($i = 0; $i < strlen($key); $i++) {
+        for ($i = 0; $i < strlen($key); ++$i) {
             $hex .= dechex(ord($key[$i]));
         }
 
@@ -45,7 +44,7 @@ class Honeypot implements MiddlewareInterface
      * Check that the honeypot field has not been filled in, and that the form
      * was not filled in quicker than possible by a human.
      *
-     * @throws SuspectedBotException Thrown if we suspect a bot has posted.
+     * @throws SuspectedBotException thrown if we suspect a bot has posted
      *
      * @return bool
      */
@@ -56,12 +55,12 @@ class Honeypot implements MiddlewareInterface
         // If the honeypot is filled in, throw an exception
         $honey = $request->input->{static::encode(self::POST_KEY)};
         if ($honey) {
-            throw new SuspectedBotException;
+            throw new SuspectedBotException();
         }
 
         $time = $request->input->{static::encode(self::POST_TIME_KEY)};
         if (time() < (base64_decode($time) + self::MIN_POST_TIME)) {
-            throw new SuspectedBotException;
+            throw new SuspectedBotException();
         }
 
         return true;

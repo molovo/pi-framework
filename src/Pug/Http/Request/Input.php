@@ -11,7 +11,8 @@ class Input extends Object
      * Get a value from the input array. If multiple arguments or an array are
      * passed, then an array of values are returned.
      *
-     * @param string|array $key The key (or keys) to fetch
+     * @param string|array $key     The key (or keys) to fetch
+     * @param mixed        $escaped
      *
      * @return mixed
      */
@@ -36,6 +37,8 @@ class Input extends Object
 
     /**
      * Get all the input arguments from the array.
+     *
+     * @param mixed $escaped
      *
      * @return array
      */

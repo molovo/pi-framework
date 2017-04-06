@@ -21,7 +21,7 @@ class Serial
         $exp = null;
 
         // Loop through each of the pattern characters
-        for ($i = 0; $i < $length; $i++) {
+        for ($i = 0; $i < $length; ++$i) {
             // Get the current character
             $char = $pattern[$i];
 
@@ -73,7 +73,7 @@ class Serial
         $serial = null;
 
         // Loop through each of the characters in the template
-        for ($i = 0; $i < $length; $i++) {
+        for ($i = 0; $i < $length; ++$i) {
             // Get the current character
             $char = $pattern[$i];
 
@@ -111,6 +111,8 @@ class Serial
     /**
      * Create a unique pattern for a serial.
      *
+     * @param mixed $len
+     *
      * @return string The pattern
      */
     public static function createPattern($len = 64)
@@ -118,7 +120,7 @@ class Serial
         $opts = ['0', 'X', 'y'];
         $str  = '';
 
-        for ($i = 0; $i < $len; $i++) {
+        for ($i = 0; $i < $len; ++$i) {
             $str .= $opts[mt_rand(0, 2)];
         }
 

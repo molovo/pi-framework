@@ -229,8 +229,8 @@ class PageCompiler extends Application
      */
     private function registerErrorHandler()
     {
-        $run     = new Whoops\Run;
-        $handler = new PlainTextHandler;
+        $run     = new Whoops\Run();
+        $handler = new PlainTextHandler();
 
         $run->pushHandler($handler);
         $run->register();
@@ -244,6 +244,7 @@ class PageCompiler extends Application
      * @param array|Closure $vars    An array of vars, or a callback which
      *                               provides vars to be injected into the
      *                               route placeholders
+     * @param mixed         $data
      */
     public function compile($route, $data, $vars)
     {

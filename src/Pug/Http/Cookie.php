@@ -11,8 +11,6 @@ class Cookie
         if (isset($_COOKIE[$key])) {
             return $_COOKIE[$key];
         }
-
-        return;
     }
 
     public static function set($key, $value, $expiry = 2592000)
