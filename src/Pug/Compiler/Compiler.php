@@ -10,10 +10,6 @@ class Compiler
      * @var string[]
      */
     public static $classMap = [
-        'css'    => CssCompiler::class,
-        'coffee' => CoffeeScriptCompiler::class,
-        'js'     => JsCompiler::class,
-        'sass'   => SassCompiler::class,
         'pages'  => PageCompiler::class,
     ];
 }

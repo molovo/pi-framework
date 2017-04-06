@@ -27,7 +27,7 @@ class Compile implements Command
 
         $scope = $args[0];
 
-        if (!in_array($scope, ['all', 'assets', 'css', 'coffee', 'js', 'sass', 'help'])) {
+        if (!in_array($scope, ['all', 'help'])) {
             Prompt::outputend(ANSI::fg('The scope "'.$scope.'" could not be found.'."\n", ANSI::RED));
 
             Help::execute($app);
@@ -43,10 +43,6 @@ class Compile implements Command
 
         if ($scope === 'all') {
             $scopes = array_keys(Compiler::$classMap);
-        }
-
-        if ($scope === 'assets') {
-            $scopes = ['css', 'coffee', 'js', 'sass'];
         }
 
         if (!is_array($scopes)) {

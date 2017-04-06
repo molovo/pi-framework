@@ -7,7 +7,6 @@ use Molovo\Amnesia\Cache;
 use Molovo\Interrogate\Database;
 use Molovo\Traffic\Route;
 use Molovo\Traffic\Router;
-use Pug\Compiler\Compiler;
 use Pug\Framework\Exceptions\ConfigNotFoundException;
 use Pug\Http\Exceptions\InvalidControllerException;
 use Pug\Http\Exceptions\InvalidControllerMethodException;
@@ -126,8 +125,6 @@ class Application
         View::addGlobal('app', $this);
         View::addGlobal('input', $this->request->input);
 
-        $this->compileAssets();
-
         // Execute routes
         Router::execute();
 
@@ -143,29 +140,6 @@ class Application
     {
         if (Router::current() === null) {
             return $this->error(404);
-        }
-    }
-
-    /**
-     * Compile the assets for the application.
-     */
-    protected function compileAssets()
-    {
-        if ($this->config->assets->live) {
-            $classMap = Compiler::$classMap;
-
-            // We don't want to compile pages here
-            unset($classMap['pages']);
-
-            foreach ($classMap as $scope => $scopeClass) {
-                $config = $this->config->assets->{$scope};
-
-                if ($config) {
-                    $config->clean = $this->config->assets->clean;
-                    $compiler      = new $scopeClass($config);
-                    $compiler->compile();
-                }
-            }
         }
     }
 
