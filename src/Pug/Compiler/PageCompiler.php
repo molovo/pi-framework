@@ -239,12 +239,11 @@ class PageCompiler extends Application
     /**
      * Execute a compiled route, and store the output to a file.
      *
-     * @param Route         $route   The compiled route
-     * @param mixed         $compile Bool, or an iteratable dataset to compile
-     * @param array|Closure $vars    An array of vars, or a callback which
-     *                               provides vars to be injected into the
-     *                               route placeholders
-     * @param mixed         $data
+     * @param Route                  $route The compiled route
+     * @param bool|array|Traversable $data  Bool, or an iteratable dataset to compile
+     * @param array|Closure          $vars  An array of vars, or a callback which
+     *                                      provides vars to be injected into the
+     *                                      route placeholders
      */
     public function compile($route, $data, $vars)
     {

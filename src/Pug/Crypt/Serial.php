@@ -111,7 +111,7 @@ class Serial
     /**
      * Create a unique pattern for a serial.
      *
-     * @param mixed $len
+     * @param int $len
      *
      * @return string The pattern
      */

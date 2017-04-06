@@ -12,7 +12,7 @@ class Input extends Object
      * passed, then an array of values are returned.
      *
      * @param string|array $key     The key (or keys) to fetch
-     * @param mixed        $escaped
+     * @param bool         $escaped
      *
      * @return mixed
      */
@@ -38,7 +38,7 @@ class Input extends Object
     /**
      * Get all the input arguments from the array.
      *
-     * @param mixed $escaped
+     * @param bool $escaped
      *
      * @return array
      */
