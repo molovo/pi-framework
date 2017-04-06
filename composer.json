@@ -16,7 +16,7 @@
     ]
   },
   "require": {
-    "PHP": ">=5.5",
+    "PHP": ">=7.0",
     "molovo/traffic": "^0.1",
     "molovo/str": "^0.1",
     "molovo/interrogate": "^0.2",
