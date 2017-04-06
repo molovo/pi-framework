@@ -31,7 +31,7 @@ class Csrf implements MiddlewareInterface
     /**
      * Check that the posted CSRF token matches the value stored in the session.
      *
-     * @throws CSRFMismatchException Thrown if CSRF tokens do not match.
+     * @throws CSRFMismatchException thrown if CSRF tokens do not match
      *
      * @return bool
      */

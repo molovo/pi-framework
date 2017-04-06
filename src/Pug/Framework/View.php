@@ -221,8 +221,6 @@ class View
         if (isset($this->options[$key])) {
             return $this->options[$key];
         }
-
-        return;
     }
 
     /**
@@ -282,8 +280,6 @@ class View
         if (isset($this->vars[$key])) {
             return $this->vars[$key];
         }
-
-        return;
     }
 
     /**
@@ -380,7 +376,6 @@ class View
         $vars = array_merge($this->vars, $vars);
 
         switch ($this->type) {
-
             // The view is a markdown file
             case 'md':
             case 'markdown':
@@ -541,7 +536,7 @@ class View
     {
         // Set up the Parsedown parses
         if (static::$markdownParser === null) {
-            static::$markdownParser = new Parsedown;
+            static::$markdownParser = new Parsedown();
         }
 
         // Pass the raw markdown through the mustache parser

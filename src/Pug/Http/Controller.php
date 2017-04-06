@@ -44,7 +44,7 @@ class Controller
         $this->response = $response;
 
         foreach ($this->middleware as $middleware) {
-            if (!((new $middleware) instanceof Middleware)) {
+            if (!((new $middleware()) instanceof Middleware)) {
                 throw new InvalidMiddlewareException($middleware.' is not a valid middleware class');
             }
 

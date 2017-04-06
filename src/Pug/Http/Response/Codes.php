@@ -106,7 +106,5 @@ class Codes
         if ($code === null) {
             return static::$allowed;
         }
-
-        return;
     }
 }
