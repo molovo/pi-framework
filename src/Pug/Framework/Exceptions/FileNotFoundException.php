@@ -2,6 +2,6 @@
 
 namespace Pug\Framework\Exceptions;
 
-class FileNotFoundException extends \Exception
+class FileNotFoundException extends PugException
 {
 }

@@ -5,10 +5,12 @@
       "Pug\\Cli\\": "src/Pug/Cli/",
       "Pug\\Compiler\\": "src/Pug/Compiler/",
       "Pug\\Crypt\\": "src/Pug/Crypt/",
+      "Pug\\Data\\": "src/Pug/Data/",
       "Pug\\Framework\\": "src/Pug/Framework/",
       "Pug\\Http\\": "src/Pug/Http/"
     },
     "files": [
+      "src/Pug/Data/helpers.php",
       "src/Pug/Framework/helpers.php",
       "src/Pug/Http/helpers.php"
     ]
