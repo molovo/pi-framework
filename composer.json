@@ -21,7 +21,7 @@
     "molovo/str": "^0.1",
     "molovo/interrogate": "^0.2",
     "molovo/amnesia": "^0.2",
-    "molovo/object": "^1.0",
+    "molovo/object": "^2.0",
     "filp/whoops": "2.*",
     "tedivm/jshrink": "~1.0",
     "coffeescript/coffeescript": "^1.3",
